@@ -28,7 +28,6 @@ dataBIC %>% class()
 dataBIC %>% str()
 dataBIC$ModelMode <- gsub(" ","",dataBIC$ModelMode)
 dataBIC$logGrav <- log1p(dataBIC$grav_total)
-# create unique ID for the full matrix
 
 
 #########################

@@ -41,7 +41,7 @@ all <- dataBIC %>%
   dplyr::group_by(ModelMode) %>% 
   dplyr::select(sites,
                 ModelMode,
-                Indegree,logB,logB1,logB2,logGrav) %>% 
+                Indegree,logB,logB1,logB2,logGrav,Age_MPA) %>% 
   mutate(grouped_id = row_number()) %>% 
   spread(key=ModelMode,value=Indegree) %>%
   as.data.frame()
@@ -56,20 +56,22 @@ summary(all)
 #all$quantresid <- ifelse(all$resid15 < 17, "LOW", ifelse(
 #  all$resid15 >= 17 & all$resid15<80, "MEDIUM","HIGH"))
 
-all$quantresid <- ifelse(all$resid15 < 26, "LOW","HIGH")
+all$quantresid <- ifelse(all$resid15 < 20, "LOW","HIGH")
 
 summary(as.factor(all$quantresid))
 quantile(all$resid15, prob = seq(0,1,0.01))
 hist(all$resid15)
 
 test %>% rm()
-test <- lm(logB ~  quantresid*logGrav,data=all)
+test <- lm(logB ~  quantresid*logGrav+Age_MPA*quantresid,data=all)
 summary(test)
 anova(test)
 
 library(visreg)
 visreg(test)
+visreg2d(test,xvar="logGrav",yvar="Age_MPA")
 visreg::visreg(test,xvar="logGrav",by="quantresid")
+visreg::visreg(test,xvar="Age_MPA",by="quantresid")
 
 quantile(all$resid15, prob = seq(0,1,0.1))
 mean(dataBIC$Indegree)
