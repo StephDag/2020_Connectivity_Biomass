@@ -1,36 +1,63 @@
-#Trying to overlay points
-nodesID<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/IDs.csv",h=T)
-head(nodesID) #14804 id's
-colnames(nodesID) <- c("ID","ID2","lon","lat","territory","other")
-sites<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/databiomassFull.csv",h=T)
-###
-#library(ggmap)
+# create full biomass/connectivity database
+# Author: Luisa Fontura
+# Date: February 2020
+# contributions: Steph D'agata
+# outpupts: final sites*biomass*connectivity data.frame
+
+rm(list=ls())
+
+# load library
 library(tidyverse)
 library(RColorBrewer)
-#theme_set(theme_bw())
 library(maptools)
 library(maps)
 library(hutilscpp) 
-View(filtertre)
+
+# load nodes data from connectivity matrix with unique ID for each cell
+nodesID<-read.csv(here("_data","IDs.csv"))
+
+  # check
+  nodesID %>% head() #14804 id's
+  colnames(nodesID) <- c("ID","ID2","lon","lat","territory","other")
+
+# load sites*biomass data.frame  
+sites<-read.csv(here("_data","databiomassFull.csv"))
+sites %>% head()
+
 #crossing nodes ID with sites 
-dt<-match_nrst_haversine(sites$lat, sites$lon, nodesID$lat, nodesID$lon, nodesID$ID,
+dt %>% rm()
+dt <- match_nrst_haversine(sites$lat, sites$lon, nodesID$lat, nodesID$lon, nodesID$ID,
                          close_enough = 0.1)
+dt %>% head()
+dt %>% dim()
+
+  # are the ID unique?
+  dt$pos %>% duplicated() %>% which() %>% length()
+  dt[which(dt$pos == "V194"),]
+  
+        # 92 ID are duplicated = 92 sites fall into the same cells from the connectivity matrix
+        # once the connectivity and biomass matrix are merged, need to create a unique ID for each transect
+
+# merge sites and connectivity ID
 sites$ID<-dt$pos
 sites$distprox<-dt$dist
-head(sites) #ok 
-summary(bigmama)
-library(igraph)
+sites %>% head()
 
-#checking<-merge(sites,nodesID,by=c("ID"),all=F)
-dim(sites) #452 sites
-#View(checking[,c("sites","locality","territory")])
+  # create unique ID for the sites matrix
+  colnames(sites)[1] <- "rowID"
 
-##reading big mama - Global metrics for 14805 reef cells 
-bigmama<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/Connectivity/global_metrics.csv",h=T)
+sites %>% head() #ok 
 
-##
+## reading big mama - Global metrics for 14805 reef cells 
+bigmama<-read.csv(here("_data","global_metrics.csv"))
+bigmama %>% head()
+bigmama %>% dim()
+
+## merge connectivyt metrics and sites data.frame
 firstat<-merge(sites,bigmama,by=c("ID"),all=F)
 dim(firstat) #ok
+firstat %>% head()
+
 #distance from point (matching ID's)
 filterone<-firstat[firstat$distprox<30,] #403 sites
 filtertwo<-firstat[firstat$distprox<20,] #374 sites
@@ -71,19 +98,19 @@ head(testandodata4)
 
 unique(testandodata$ID)
 ##LR
-dd<-(testandodata4[,c("ID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","LocalRet")])
+dd<-(testandodata4[,c("ID","rowID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","LocalRet")])
 #dd$ModelMode<-gsub("LR", " ", dd$Modeltype)
 dim(dd) #ok
 #in
-ww<-(testandodata[,c("ID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","INdegree")])
+ww<-(testandodata[,c("ID","rowID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","INdegree")])
 #ww$ModelMode<-gsub("in", " ", ww$Modeltype)
 dim(ww)
 #out
-cc<-(testandodata2[,c("ID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","Outdegree")])
+cc<-(testandodata2[,c("ID","rowID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","Outdegree")])
 #cc$ModelMode<-gsub("out", " ", cc$Modeltype)
 dim(cc)
 #btw
-ee<-(testandodata3[,c("ID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","Btwdegree")])
+ee<-(testandodata3[,c("ID","rowID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","Btwdegree")])
 dim(ee)
 #ee$ModelMode<-gsub("btw", " ", ee$Modeltype)
 
