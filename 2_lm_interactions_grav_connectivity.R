@@ -38,10 +38,11 @@ all <- dataBIC %>%
   mutate(ModelMode = as.character(ModelMode)) %>%
   dplyr::filter(ModelMode %in% c("crypto15","pare15","transi15","resid15")) %>%
   dplyr::filter(Larval_behaviour %in% c("active")) %>%
+ # dplyr::filter(Age_MPA > 0) %>%
   dplyr::group_by(ModelMode) %>% 
   dplyr::select(sites,
                 ModelMode,
-                Indegree,logB,logB1,logB2,logGrav,Age_MPA) %>% 
+                Indegree,logB,logB1,logB2,logGrav,Age_MPA,Class) %>% 
   mutate(grouped_id = row_number()) %>% 
   spread(key=ModelMode,value=Indegree) %>%
   as.data.frame()
@@ -57,13 +58,14 @@ summary(all)
 #  all$resid15 >= 17 & all$resid15<80, "MEDIUM","HIGH"))
 
 all$quantresid <- ifelse(all$resid15 < 20, "LOW","HIGH")
-
+all$quantresid <- as.factor(all$quantresid)
 summary(as.factor(all$quantresid))
 quantile(all$resid15, prob = seq(0,1,0.01))
-hist(all$resid15)
+hist(all$resid15,breaks=100)
 
+# linear model
 test %>% rm()
-test <- lm(logB ~  quantresid*logGrav+Age_MPA*quantresid,data=all)
+test <- lm(logB ~  quantresid*logGrav*Class,data=all)
 summary(test)
 anova(test)
 
@@ -71,8 +73,16 @@ library(visreg)
 visreg(test)
 visreg2d(test,xvar="logGrav",yvar="Age_MPA")
 visreg::visreg(test,xvar="logGrav",by="quantresid")
+visreg::visreg(test,xvar="logGrav",by="Class")
 visreg::visreg(test,xvar="Age_MPA",by="quantresid")
 
-quantile(all$resid15, prob = seq(0,1,0.1))
-mean(dataBIC$Indegree)
+# gam
+library(mgcv)
+test.gam <- mgcv::gam(logB ~ quantresid+  s(logGrav,by = quantresid) + 
+                        s(logGrav,by = Class),data=all,method="REML")
+summary(test.gam)
+anova(test.gam)
 
+visreg(test.gam)
+visreg::visreg(test.gam,xvar="logGrav",by="quantresid")
+visreg::visreg(test.gam,xvar="logGrav",by="Class")
