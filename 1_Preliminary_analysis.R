@@ -27,6 +27,7 @@ dataBIC %>% dim()
 dataBIC %>% class()
 dataBIC %>% str()
 dataBIC$ModelMode <- gsub(" ","",dataBIC$ModelMode)
+dataBIC$logGrav <- log1p(dataBIC$grav_total)
 # create unique ID for the full matrix
 
 
@@ -76,4 +77,45 @@ p <- p + scale_fill_gradient2(limit = c(0.5,1), low = "blue", high = "red", mid=
 p
 ggsave(here("_prelim.figures","correl_scenario__INDEGREE.V2.pdf"),plot=p)
 
+# explanatory variables and connectivity (in)
+all %>% rm()
+all <- dataBIC %>% 
+  mutate(ModelMode = as.character(ModelMode)) %>%
+  dplyr::filter(ModelMode %in% c("crypto15","pare15","transi15","resid15")) %>%
+  dplyr::group_by(ModelMode) %>% 
+  dplyr::select(sites,
+                ModelMode,
+                Indegree,biomassarea,biomassarea1,biomassarea2,logGrav) %>% 
+  mutate(grouped_id = row_number()) %>% 
+  spread(key=ModelMode,value=Indegree) %>%
+  as.data.frame()
+dim(all)
+head(all)
+summary(all)
+
+g %>% rm()
+g = ggpairs(all, columns=c(2:5,7:10), lower = list(continuous = my_fn))
+g
+ggsave(here("_prelim.figures","correl_scenario_INDEGREE.expla.pdf"),plot=g,width=20,height=20)
+
+# explanatory variables and connectivity (LR)
+all %>% rm()
+all <- dataBIC %>% 
+  mutate(ModelMode = as.character(ModelMode)) %>%
+  dplyr::filter(ModelMode %in% c("crypto15","pare15","transi15","resid15")) %>%
+  dplyr::group_by(ModelMode) %>% 
+  dplyr::select(sites,
+                ModelMode,
+                LocalRet,biomassarea,biomassarea1,biomassarea2,logGrav) %>% 
+  mutate(grouped_id = row_number()) %>% 
+  spread(key=ModelMode,value=LocalRet) %>%
+  as.data.frame()
+dim(all)
+head(all)
+summary(all)
+
+g %>% rm()
+g = ggpairs(all, columns=c(2:5,7:10), lower = list(continuous = my_fn))
+g
+ggsave(here("_prelim.figures","correl_scenario_LR.expla.pdf"),plot=g,width=20,height=20)
 
