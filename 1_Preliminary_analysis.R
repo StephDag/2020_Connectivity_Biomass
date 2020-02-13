@@ -16,6 +16,7 @@ library(ggplot2)
 library(GGally)
 library(tidyr)
 library(stringr)
+library(tidyverse)
 
 # load data
 dataBIC %>% rm()
@@ -24,36 +25,35 @@ dataBIC %>% head()
 dataBIC %>% summary()
 dataBIC %>% dim()
 dataBIC %>% class()
-
+dataBIC %>% str()
+dataBIC$ModelMode <- gsub(" ","",dataBIC$ModelMode)
 # create unique ID for the full matrix
 
-# correlation plot
 
-  
-crypto %>% rm()
-crypto <- dataBIC %>% 
-         filter(str_detect(ModelMode, c("crypto15","crypto5","crypto35"))) %>%
-        dplyr::select(ID,region,locality,sites,ModelMode,Indegree) %>%
-         spread(key=ModelMode,value=Indegree)
-crypto <- crypto[-which(is.na(crypto$`crypto15 `)),]
+#########################
+#       IN DEGREE       #
+#########################
 
-          ggpairs(columns=18:20)
-        
-crypto %>% summary()
-crypto %>% head()
-crypto %>% dim()
-crypto$ID %>% unique() %>% length()
+# all
+all %>% rm()
+all <- dataBIC %>% 
+  mutate(ModelMode = as.character(ModelMode)) %>%
+  dplyr::filter(ModelMode %in% c("crypto5","crypto15","crypto35",
+                                 "pare5","pare15","pare25",
+                                 "transi5","transi15","transi35",
+                                 "resid5","resid15","resid35")) %>%
+  dplyr::group_by(ModelMode) %>% 
+  dplyr::select(sites,
+                ModelMode,
+                Indegree) %>% 
+  mutate(grouped_id = row_number()) %>% 
+  spread(key=ModelMode,value=Indegree) %>%
+  as.data.frame()
+dim(all)
+head(all)
+summary(all)
 
-crypto[which(crypto$ID == "V1272"),]
-       
-   
-
-  
-  require(datasets)
-data("swiss")
-              require(GGally)
-              require(ggplot2)
-              
+# fonction to plot correlation with lm and loess function
               my_fn <- function(data, mapping, ...){
               p <- ggplot(data = data, mapping = mapping) + 
               geom_point() + 
@@ -62,38 +62,18 @@ data("swiss")
               p
               }
               
-              g = ggpairs(swiss,columns = 1:4, lower = list(continuous = my_fn))
-              g
-  
-        ggpairs(Indegree, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)))
-
-
-
-#%>%
-#         spread(key=ModelMode, value=Indegree) %>% 
-crypto %>% head()
-crypto %>% summary()
-crypto %>% dim()
-crypto %>% names()
-%>%
- %>%
- head()
-
-dataBIC$ID %>% length()
-dataBIC$ID %>% unique() %>% length()
-
-  ggplot(color=Larval_behaviour)+
-          geom_point() +
-          geom_smooth()
-
-ggcorr(nba[, -1],
-       label = TRUE,
-       label_alpha = TRUE,
-       name = "") +
-  ggplot2::theme(legend.position = "bottom")  
-
-plot(log1p(dataBIC$grav_total),dataBIC$Indegree)
-plot(log1p(dataBIC$grav_total),dataBIC$LocalRet)
-plot(log1p(dataBIC$grav_total),dataBIC$Outdegree)
+# correlation between all functional groups and  scnearios with biplots        
+g = ggpairs(all,columns = 3:14, lower = list(continuous = my_fn))
+g
+ggsave(here("_prelim.figures","correl_scenario_INDEGREE.V1.pdf"),plot=g,width=20,height=20)
+# correlation between all functional groups and  scnearios only R2 values 
+library(ggcorrplot)
+library(RColorBrewer)
+correlation_matrix <- cor(all[,3:14])
+colors <- brewer.pal(n = 3, name = "RdYlBu")
+p <- ggcorrplot(correlation_matrix , type = "upper", hc.order = TRUE, colors = brewer.pal(n = 3, name = "RdYlBu"))
+p <- p + scale_fill_gradient2(limit = c(0.5,1), low = "blue", high = "red", mid="orange", midpoint = 0.75)
+p
+ggsave(here("_prelim.figures","correl_scenario__INDEGREE.V2.pdf"),plot=p)
 
 

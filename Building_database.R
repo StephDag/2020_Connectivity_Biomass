@@ -112,6 +112,7 @@ dim(cc)
 #btw
 ee<-(testandodata3[,c("ID","rowID","region","locality","sites","lat","lon","biomassarea","biomassarea1","biomassarea2","grav_total","ModelMode","Btwdegree")])
 dim(ee)
+head(ee)
 #ee$ModelMode<-gsub("btw", " ", ee$Modeltype)
 
 #merge daaframes dd (LR), ww (in), cc (out), ee (btw)
@@ -126,7 +127,8 @@ dd$Btw<-ee$Btwdegree
 
 mainmatrix<-dd
 summary(mainmatrix)
-
+head(mainmatrix)
+dim(mainmatrix)
 #write.csv(mainmatrix, "mainmatrix.csv")
 
 unique(mainmatrix$sites) #272 sites
