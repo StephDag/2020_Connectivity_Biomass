@@ -65,7 +65,7 @@ hist(all$resid15,breaks=100)
 
 # linear model
 test %>% rm()
-test <- lm(logB ~  quantresid*logGrav*Class,data=all)
+test <- lm(logB ~  quantresid*logGrav+ quantresid*Age_MPA,data=all)
 summary(test)
 anova(test)
 
@@ -75,6 +75,14 @@ visreg2d(test,xvar="logGrav",yvar="Age_MPA")
 visreg::visreg(test,xvar="logGrav",by="quantresid")
 visreg::visreg(test,xvar="logGrav",by="Class")
 visreg::visreg(test,xvar="Age_MPA",by="quantresid")
+
+
+test.2 %>% rm()
+test.2 <- lm(logB ~  logGrav+Age_MPA,data=all)
+summary(test.2)
+anova(test.2)
+
+AIC(test, test.2)
 
 # gam
 library(mgcv)

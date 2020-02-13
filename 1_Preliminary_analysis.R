@@ -42,6 +42,7 @@ all <- dataBIC %>%
                                  "pare5","pare15","pare25",
                                  "transi5","transi15","transi35",
                                  "resid5","resid15","resid35")) %>%
+  dplyr::filter(Larval_behaviour %in% c("active")) %>%
   dplyr::group_by(ModelMode) %>% 
   dplyr::select(sites,
                 ModelMode,
@@ -81,6 +82,7 @@ all %>% rm()
 all <- dataBIC %>% 
   mutate(ModelMode = as.character(ModelMode)) %>%
   dplyr::filter(ModelMode %in% c("crypto15","pare15","transi15","resid15")) %>%
+  dplyr::filter(Larval_behaviour %in% c("active")) %>%
   dplyr::group_by(ModelMode) %>% 
   dplyr::select(sites,
                 ModelMode,
@@ -102,6 +104,7 @@ all %>% rm()
 all <- dataBIC %>% 
   mutate(ModelMode = as.character(ModelMode)) %>%
   dplyr::filter(ModelMode %in% c("crypto15","pare15","transi15","resid15")) %>%
+  dplyr::filter(Larval_behaviour %in% c("active")) %>%
   dplyr::group_by(ModelMode) %>% 
   dplyr::select(sites,
                 ModelMode,
