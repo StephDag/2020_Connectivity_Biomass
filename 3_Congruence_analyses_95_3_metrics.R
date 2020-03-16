@@ -160,65 +160,65 @@ mp <- ggplot() +   mapWorld + theme(panel.grid.major = element_blank(), panel.gr
 ####
 #GROUPS total congruence
 rm(perc)
-perc <- round(100*length(which(globalbiot$IFrank == 4))/length(globalbiot$IFrank),2)
+perc <- round(100*length(which(globalbiot$IFrank == 3))/length(globalbiot$IFrank),2)
 perc
 mpIF <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$IFrank)), 
                        alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$IFrank == 4,]$Lon, y=globalbiot[globalbiot$IFrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$IFrank == 4,]$IFrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$IFrank == 3,]$Lon, y=globalbiot[globalbiot$IFrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$IFrank == 3,]$IFrank)), 
             alpha=0.5, size=1, shape=21, colour="red")
 
 
 rm(perc)
-perc <- round(100*length(which(globalbiot$inrank == 4))/length(globalbiot$inrank),2)
+perc <- round(100*length(which(globalbiot$inrank == 3))/length(globalbiot$inrank),2)
 perc
 mpin <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$inrank)), 
                         alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$inrank == 4,]$Lon, y=globalbiot[globalbiot$inrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$inrank == 4,]$inrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$inrank == 3,]$Lon, y=globalbiot[globalbiot$inrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$inrank == 3,]$inrank)), 
              alpha=0.5, size=1, shape=21, colour="red")
 
 
 rm(perc)
-perc <- round(100*length(which(globalbiot$btwrank == 4))/length(globalbiot$btwrank),2)
+perc <- round(100*length(which(globalbiot$btwrank == 3))/length(globalbiot$btwrank),2)
 perc
 mpbtw <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$btwrank)), 
                         alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$btwrank == 4,]$Lon, y=globalbiot[globalbiot$btwrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$btwrank == 4,]$btwrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$btwrank == 3,]$Lon, y=globalbiot[globalbiot$btwrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$btwrank == 3,]$btwrank)), 
              alpha=0.5, size=1, shape=21, colour="red")
 
 rm(perc)
-perc <- round(100*length(which(globalbiot$LRrank == 4))/length(globalbiot$LRrank),2)
+perc <- round(100*length(which(globalbiot$LRrank == 3))/length(globalbiot$LRrank),2)
 perc
 mpLR <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$LRrank)), 
                          alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$LRrank == 4,]$Lon, y=globalbiot[globalbiot$LRrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$LRrank == 4,]$LRrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$LRrank == 3,]$Lon, y=globalbiot[globalbiot$LRrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$LRrank == 3,]$LRrank)), 
              alpha=0.5, size=1, shape=21, colour="red")
 
 rm(perc)
-perc <- round(100*length(which(globalbiot$OFrank == 4))/length(globalbiot$OFrank),2)
+perc <- round(100*length(which(globalbiot$OFrank == 3))/length(globalbiot$OFrank),2)
 perc
 mpOF <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$OFrank)), 
                         alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$OFrank == 4,]$Lon, y=globalbiot[globalbiot$OFrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$OFrank == 4,]$OFrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$OFrank == 3,]$Lon, y=globalbiot[globalbiot$OFrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$OFrank == 3,]$OFrank)), 
              alpha=0.5, size=1, shape=21, colour="red")
 
 rm(perc)
-perc <- round(100*length(which(globalbiot$outrank == 4))/length(globalbiot$outrank),2)
+perc <- round(100*length(which(globalbiot$outrank == 3))/length(globalbiot$outrank),2)
 perc
 mpout <- mp + geom_point(aes(x=globalbiot$Lon, y=globalbiot$Lat, fill=as.factor(globalbiot$outrank)), 
                         alpha=0.5, size=1, shape=21, colour="white") +
   scale_fill_manual(values=c("blue","blue","blue","blue","red")) + labs(x="",y="") + theme(legend.position = "none") +
-  geom_point(aes(x=globalbiot[globalbiot$outrank == 4,]$Lon, y=globalbiot[globalbiot$outrank == 4,]$Lat, 
-                 fill=as.factor(globalbiot[globalbiot$outrank == 4,]$outrank)), 
+  geom_point(aes(x=globalbiot[globalbiot$outrank == 3,]$Lon, y=globalbiot[globalbiot$outrank == 3,]$Lat, 
+                 fill=as.factor(globalbiot[globalbiot$outrank == 3,]$outrank)), 
              alpha=0.5, size=1, shape=21, colour="red")
 
 ggarrange(mpIF,mpin,mpOF,mpout,mpLR,mpbtw,labels=c("Inflow","Indegree","Outflow",
