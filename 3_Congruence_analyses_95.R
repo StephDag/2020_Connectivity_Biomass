@@ -314,19 +314,23 @@ visreg::visreg(test3RN,"LogIn")
 
 
 #BIOMASS
-testB1<-gam(LogB ~ LogG + temp + Class + richness,data=filtertre)
-testB2<-gam(LogB ~ LogG + temp + Class + LogIF + IFrank + LogIn*inrank +
-              LogLR*LRrank + Logbtw + btwrank + richness,data=filtertre)
+testB0<-gam(LogB ~ Class*LogG + temp,data=filtertre)
+testB1<-gam(LogB ~ Class*LogG + temp + richness,data=filtertre)
+testB2<-gam(LogB ~ Class*LogG + temp + LogIF + LogIn +
+              LogLR + Logbtw + richness,data=filtertre)
 vif(testB2) #huge VIF
 
-testB3<-gam(LogB ~ LogG + temp + Class + LogIn * inrank+ richness,data=filtertre) #less worse
-testB4<-gam(LogB ~ LogG + temp + Class + LogLR * LRrank+ richness,data=filtertre)
-testB5<-gam(LogB ~ LogG + temp + Class + Logbtw * btwrank+ richness,data=filtertre)
-testB6<-gam(LogB ~ LogG + temp + Class + LogIF * IFrank+ richness,data=filtertre)
+testB3<-gam(LogB ~ Class*LogG + temp + LogIn + richness,data=filtertre) #less worse
+testB4<-gam(LogB ~ Class*LogG + temp + LogLR + richness,data=filtertre)
+testB5<-gam(LogB ~ Class*LogG + temp + Logbtw + richness,data=filtertre)
+testB6<-gam(LogB ~ Class*LogG + temp + LogIF + richness,data=filtertre)
 
-model.sel(testB1,testB3,testB4,testB5,testB6) # removing variable with smaller AIC:
+model.sel(testB0,testB1,testB2,testB3,testB4,testB5,testB6) # removing variable with smaller AIC:
 #connectivity does not explain biomass
-summary(testB3) #14%
+summary(testB3) #22.3%
+summary(testB5) # 22.3%
+summary(testB1) # 21.4
+summary(testB0) # 19.4
 
 par(mfrow=c(2,2))
 visreg::visreg(test5RN,"Logbtw")
