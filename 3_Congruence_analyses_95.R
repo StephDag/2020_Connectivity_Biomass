@@ -280,7 +280,7 @@ test4R<-gam(richness ~ LogG + temp + Class + LogLR + LRrank, family="poisson",da
 test5R<-gam(richness ~ LogG + temp + Class + Logbtw + btwrank, family="poisson",data=filtertre) #btw 1st
 test6R<-gam(richness ~ LogG + temp + Class + LogIF + IFrank, family="poisson",data=filtertre)
 
-model.sel(test1R,test3R,test4R,test5R,test6R) # removing variable with smaller AIC:
+model.sel(test2R,test3R,test4R,test5R,test6R) # always compare nested models ,removing variable with smaller AIC:
 #5, 3 and 6 (all the models with conectivity improve AIC) - btw better explain diversity
 summary(test1R)
 summary(test5R) #10% improvement in Dev.Expl 
