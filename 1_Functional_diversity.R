@@ -76,7 +76,6 @@ fishdatatrait<-as.matrix((fish3 > 0) + 0)
 #Setting matrices (traits, pcoa and biomass)#setting datasets (traits and biomass matrix)
 #####
 
-
 rm(LIZ_FD)
 Global_FD <- multidimFD(pcoa.trait.cor,fishdatatrait %>% as.matrix)
 fd<-as.data.frame(Global_FD)

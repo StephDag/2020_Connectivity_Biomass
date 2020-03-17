@@ -1,7 +1,7 @@
 # Preliminary analysis - Global connectivity 
 # author: Steph D'agata
 # date: February 2020
-# outpupts: preliminary plots
+# outputs: preliminary plots
 
 rm(list=ls())
 
