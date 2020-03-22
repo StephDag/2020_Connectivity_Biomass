@@ -10,19 +10,27 @@ library(MASS)
 library(MuMIn)
 library(lmerTest)
 library(mgcv)
-
+library(here)
+library(hutilscpp)
+library(tidyr)
+library(plyr)
+library(tidyverse)
 
 #1st part 
 #Connectivity Rank----
-bigmama<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/Connectivity/global_metricsLU.csv",h=T)
+bigmama %>% rm()
+bigmama<-read.csv(here("_data","global_metrics.csv"),h=T)
 summary(bigmama)
 
-#PASSIVE (ask m=Majambo to have a look in the parental and resident matrices - cor=1 (impossible))
-#passive<-bigmama[,c("cryptoIF","pareIF","residIF","transiIF",
-#                   "cryptoout","pareout","residout","transiout",
-#                   "cryptobtw","parebtw","residbtw","transibtw",
-#                   "cryptoIF","pareIF","residIF","transiIF",
-#                   "cryptoLR","pareLR","residLR","transiLR")]
+
+#PASSIVE
+
+passive<-bigmama[,c("cryptoIF","pareIF","residIF","transiIF",
+                   "cryptoout","pareout","residout","transiout",
+                   "cryptobtw","parebtw","residbtw","transibtw",
+                   "cryptoOF","pareOF","residOF","transiOF",
+                   "cryptoLR","pareLR","residLR","transiLR")]
+
 
 active<-bigmama[,c("ID","crypto5in","pare5in","resid15in","transi15in",
                     "crypto5out","pare5out","resid15out","transi15out",
@@ -31,8 +39,6 @@ active<-bigmama[,c("ID","crypto5in","pare5in","resid15in","transi15in",
                     "crypto5LR","pare5LR","resid15LR","transi15LR",
                    "crypto5IFS","pare5IFS","resid15IFS","transi15IFS",
                    "crypto5OF","pare5OF","resid15OF","transi15OF")]
-
-
 
 ####Quantiles ACTIVE
 #75%-100% - HIGH (1)
@@ -209,13 +215,29 @@ ggarrange(mpIF,mpin,mpOF,mpout,mpLR,mpbtw,labels=c("Inflow","Indegree","Outflow"
 
 
 #BIOMASS, RICHNESS ~ CONNECTIVITY---- 
-#Overlay points/ Preparing data ----
+
+#Preparing data ----
+active<-bigmama[,c("ID","crypto5IF","pare5IF","resid15IF","transi15IF",
+                   "crypto5in","pare5in","resid15in","transi15in",
+                   "crypto5OF","pare5OF","resid15OF","transi15OF")]
+
+active$totalIFA<-rowSums(active[,c("crypto5IF","pare5IF","resid15IF","transi15IF")])
+active$totalinA<-rowSums(active[,c("crypto5in","pare5in","resid15in","transi15in")])
+active$totalOFA<-rowSums(active[,c("crypto5OF","pare5OF","resid15OF","transi15OF")])
+
+
+passive<-bigmama[,c("ID","cryptoIF","pareIF","residIF","transiIF",
+                    "cryptoOF","pareOF","residOF","transiOF")]
+
+passive$totalIF<-rowSums(passive[,c("cryptoIF","pareIF","residIF","transiIF")])
+passive$totalOF<-rowSums(passive[,c("cryptoOF","pareOF","residOF","transiOF")])
+
+
 nodesID<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/IDs.csv",h=T)
 head(nodesID) #14804 id's
 colnames(nodesID) <- c("ID","ID2","lon","lat","territory","other")
 
-dataBIC<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Prior biomass and PLD analyses/Chapter_4/databiomassFull.csv")
-
+dataBIC<-read.csv(here("_data","/databiomassFull.csv"),h=T)
 dt<-match_nrst_haversine(dataBIC$lat, dataBIC$lon, nodesID$lat, nodesID$lon, nodesID$ID,
                          close_enough = 0.1)
 dataBIC$ID<-dt$pos
@@ -223,93 +245,58 @@ dataBIC$distprox<-dt$dist
 head(dataBIC)
 firstat<-merge(dataBIC,active,by=c("ID"),all=F)
 dim(firstat) #452 sites
-filtertre<-firstat[firstat$distprox<10,] #273 sites -> apply this one (only biomass sites inside reef cells) 
-
+filtertre<-firstat[firstat$distprox<10,] #272 (3 on same ID) sites -> apply this one (only biomass sites inside reef cells) 
+filtertre<-left_join(filtertre,passive,by="ID")
+summary(filtertre)
 #Sum metrics
-filtertre$sumIN<-rowSums(filtertre[,c("crypto5in","pare5in","resid15in","transi15in")])
-filtertre$sumIF<-rowSums(filtertre[,c("crypto5IF","pare5IF","resid15IF","transi15IF")])
-filtertre$sumLR<-rowSums(filtertre[,c("crypto5LR","pare5LR","resid15LR","transi15LR")])
-filtertre$sumbtw<-rowSums(filtertre[,c("crypto5btw","pare5btw","resid15btw","transi15btw")])
-
-
-filtertre$LogB <- log1p(filtertre$biomassarea)
+filtertre$LogB <- log1p(filtertre$biomassarea1)
 filtertre$LogG <- log1p(filtertre$grav_total)
-filtertre$LogIn <- log1p(filtertre$sumIN)
-filtertre$inrank <-as.factor(filtertre$inrank)
-filtertre$LogIF <- log1p(filtertre$sumIF) 
-filtertre$IFrank <-as.factor(filtertre$IFrank)
-filtertre$Logbtw <- log1p(filtertre$sumbtw) 
-filtertre$btwrank <-as.factor(filtertre$btwrank)
-filtertre$LogLR <- log1p(filtertre$sumLR) 
-filtertre$LRrank <-as.factor(filtertre$LRrank)
+
+#Delta outflow
+head(filtertre)
+#Transform g/m to Kg/hectare (*10)
+#Delta - real/potential OF weighted by biomass (sum OF)
+filtertre$deltaOF<-log10(((10*filtertre$biomassarea1)*filtertre$totalOF)/(1000*filtertre$totalOF)+0.1)
+filtertre$deltaOFA<-log10(((10*filtertre$biomassarea1)*filtertre$totalOFA)/(1000*filtertre$totalOFA)+0.1)
+
+hist(filtertre$deltaOF)
 
 
 #MODELS ----
+#1st.	How human impact affect larval connectivity?
+filtertre$LogOF<-log1p(filtertre$totalOF)
+filtertre$LogOFA<-log1p(filtertre$totalOFA)
 
-bioric<-gam(richness ~ LogB, family="poisson",data=filtertre)
-visreg::visreg(bioric)
-summary(bioric) #r=0.06
-
-#Species richness
-test1R<-gam(richness ~ LogG + temp + Class, family="poisson",data=filtertre)
-test2R<-gam(richness ~ LogG + temp + Class + LogIF + IFrank + LogIn*inrank +
-            LogLR*LRrank + Logbtw + btwrank, family="poisson",data=filtertre)
-vif(test2R) #huge VIF
-
-test3R<-gam(richness ~ LogG + temp + Class + LogIn + inrank, family="poisson",data=filtertre)
-test4R<-gam(richness ~ LogG + temp + Class + LogLR + LRrank, family="poisson",data=filtertre)
-test5R<-gam(richness ~ LogG + temp + Class + Logbtw + btwrank, family="poisson",data=filtertre) #btw 1st
-test6R<-gam(richness ~ LogG + temp + Class + LogIF + IFrank, family="poisson",data=filtertre)
-
-model.sel(test1R,test3R,test4R,test5R,test6R) # removing variable with smaller AIC:
-#5, 3 and 6 (all the models with conectivity improve AIC) - btw better explain diversity
-summary(test1R)
-summary(test5R) #10% improvement in Dev.Expl 
-summary(test3R) #9%
-
-visreg::visreg(test5RN,"btwrank")
-visreg::visreg(test3RN,"inrank")
-
-test5RN<-gam(richness ~ LogG + temp + Class + Logbtw + btwrank,data=filtertre) #btw 1st
-test3RN<-gam(richness ~ LogG + temp + Class + LogIn + inrank,data=filtertre)
-
-
-summary(test1R) #14%
-summary(test5R) #24%
-summary(test3R) #24%
-
-
-plot(log(fitted(test5R)), residuals(test5R), xlab = "Fitted Values (log)", ylab = "Residuals", las=1)
-abline(h=0, lty=2 ,col='red')
-qqPlot(resid(test5R), grid=F, col.lines="grey", ylab="", las=1) #ok
-
+#Relationship between Outflow, biomass and gravity
+test1<-gam(LogOF ~ LogG, data=filtertre)
+test1A<-gam(LogOFA ~ LogG, data=filtertre)
+summary(test1A) 
 par(mfrow=c(1,2))
-visreg::visreg(test5RN,"Logbtw")
-visreg::visreg(test3RN,"LogIn")
+visreg::visreg(test1) #no relatinship between Outflow and Gravity
+visreg::visreg(test1A) #no relatinship between Outflow active model and Gravity
+#modelBio<-gam(LogB ~ LogG + Class + LogOFA, data=filtertre)
+#modelOF<-gam(LogOFA ~ LogG + Class + LogB, data=filtertre)
+#visreg::visreg(modelBio,"LogG",by="Class")
+#visreg::visreg(modelOF,"LogG")
+#visreg::visreg(modelOF,"LogB","Class")
 
 
-#BIOMASS
-testB1<-gam(LogB ~ LogG + temp + Class,data=filtertre)
-testB2<-gam(LogB ~ LogG + temp + Class + LogIF + IFrank + LogIn*inrank +
-              LogLR*LRrank + Logbtw + btwrank,data=filtertre)
-vif(testB2) #huge VIF
+#Delta outflow (little difference between active and passive)
+#passive model Delta
+outflowH1<-gam(deltaOF ~ LogG + Class, data=filtertre)
+summary(outflowH1) #Deviance explained 11%
+#active model Delta
+outflowAH1<-gam(deltaOFA ~ LogG * Class, data=filtertre) #14.4
+outflowAH1B<-gam(deltaOFA ~ LogG + Class, data=filtertre)
 
-testB3<-gam(LogB ~ LogG + temp + Class + LogIn * inrank,data=filtertre) #less worse
-testB4<-gam(LogB ~ LogG + temp + Class + LogLR * LRrank,data=filtertre)
-testB5<-gam(LogB ~ LogG + temp + Class + Logbtw * btwrank,data=filtertre)
-testB6<-gam(LogB ~ LogG + temp + Class + LogIF * IFrank,data=filtertre)
+model.sel(outflowAH1,outflowAH1B) #with an interaction - deltaAIC(2.11)
+visreg::visreg(outflowAH1,"Class")
+visreg::visreg(outflowAH1,"LogG",by="Class")
+visreg::visreg(outflowAH1,"LogG",by="Class",overlay=T)
+abline(h=0,lty=2)
 
-model.sel(testB1,testB3,testB4,testB5,testB6) # removing variable with smaller AIC:
-#connectivity does not explain biomass
-
-par(mfrow=c(2,2))
-visreg::visreg(test5RN,"Logbtw")
-visreg::visreg(test3RN,"LogIn")
-
-visreg::visreg(testB5,"Logbtw")
-visreg::visreg(testB3,"LogIn")
-
-
+#Does larval connectivity mitigate human impacts on reefs? (Full model?)
+#Quantile regression (.75 and .25) = Logbiomass ~ Inflow(0.75high;0.25low) + LogG + Class (test for Active and Passive)
 
 
 
