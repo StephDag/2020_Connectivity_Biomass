@@ -19,7 +19,7 @@ library(tidyverse)
 #1st part 
 #Connectivity Rank----
 bigmama %>% rm()
-bigmama<-read.csv(here("_data","global_metrics.csv"),h=T)
+bigmama<-read.csv("~/Documents/GIt/2020_Connectivity_Biomass/_data/global_metrics.csv",h=T)
 summary(bigmama)
 
 
@@ -31,6 +31,7 @@ passive<-bigmama[,c("cryptoIF","pareIF","residIF","transiIF",
                    "cryptoOF","pareOF","residOF","transiOF",
                    "cryptoLR","pareLR","residLR","transiLR")]
 
+dim(passive)
 
 active<-bigmama[,c("ID","crypto5in","pare5in","resid15in","transi15in",
                     "crypto5out","pare5out","resid15out","transi15out",
@@ -39,6 +40,22 @@ active<-bigmama[,c("ID","crypto5in","pare5in","resid15in","transi15in",
                     "crypto5LR","pare5LR","resid15LR","transi15LR",
                    "crypto5IFS","pare5IFS","resid15IFS","transi15IFS",
                    "crypto5OF","pare5OF","resid15OF","transi15OF")]
+
+
+#passive corraltion
+correlation_matrix <- cor(active[,2:29])
+colors <- brewer.pal(n = 3, name = "RdYlBu")
+p <- ggcorrplot(correlation_matrix , type = "upper", hc.order = TRUE, colors = brewer.pal(n = 3, name = "RdYlBu"))
+p <- p + scale_fill_gradient2(limit = c(0.5,1), low = "blue", high = "red", mid="orange", midpoint = 0.75)
+p
+
+#active correlation
+correlation_matrix <- cor(passive[,2:20])
+colors <- brewer.pal(n = 3, name = "RdYlBu")
+p <- ggcorrplot(correlation_matrix , type = "upper", hc.order = TRUE, colors = brewer.pal(n = 3, name = "RdYlBu"))
+p <- p + scale_fill_gradient2(limit = c(0.5,1), low = "blue", high = "red", mid="orange", midpoint = 0.75)
+p
+
 
 ####Quantiles ACTIVE
 #75%-100% - HIGH (1)
@@ -233,11 +250,11 @@ passive$totalIF<-rowSums(passive[,c("cryptoIF","pareIF","residIF","transiIF")])
 passive$totalOF<-rowSums(passive[,c("cryptoOF","pareOF","residOF","transiOF")])
 
 
-nodesID<-read.csv("~/Desktop/OneDrive - Macquarie University/Chapters/Chapter_04_on_going/Connectivity analyses/IDs.csv",h=T)
+nodesID<-read.csv("~/Documents/GIt/2020_Connectivity_Biomass/_data/IDs.csv",h=T)
 head(nodesID) #14804 id's
 colnames(nodesID) <- c("ID","ID2","lon","lat","territory","other")
 
-dataBIC<-read.csv(here("_data","/databiomassFull.csv"),h=T)
+dataBIC<-read.csv("~/Documents/GIt/2020_Connectivity_Biomass/_data/databiomassFull.csv",h=T)
 dt<-match_nrst_haversine(dataBIC$lat, dataBIC$lon, nodesID$lat, nodesID$lon, nodesID$ID,
                          close_enough = 0.1)
 dataBIC$ID<-dt$pos
@@ -256,10 +273,9 @@ filtertre$LogG <- log1p(filtertre$grav_total)
 head(filtertre)
 #Transform g/m to Kg/hectare (*10)
 #Delta - real/potential OF weighted by biomass (sum OF)
-filtertre$deltaOF<-log10(((10*filtertre$biomassarea1)*filtertre$totalOF)/(1000*filtertre$totalOF)+0.1)
-filtertre$deltaOFA<-log10(((10*filtertre$biomassarea1)*filtertre$totalOFA)/(1000*filtertre$totalOFA)+0.1)
-
-hist(filtertre$deltaOF)
+filtertre$deltaOF<-((10*filtertre$biomassarea1)*filtertre$totalOF) - (1000*filtertre$totalOF)
+filtertre$deltaOFA<-((10*filtertre$biomassarea1)*filtertre$totalOFA) - (1000*filtertre$totalOFA)
+hist(filtertre$deltaOFA)
 
 
 #MODELS ----
