@@ -94,3 +94,7 @@ anova(test.gam)
 visreg(test.gam)
 visreg::visreg(test.gam,xvar="logGrav",by="quantresid")
 visreg::visreg(test.gam,xvar="logGrav",by="Class")
+
+
+##Maina
+
