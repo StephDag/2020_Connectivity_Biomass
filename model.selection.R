@@ -75,7 +75,14 @@ for(con in vifPredCombinations){
 }
 
 ##configure models
-
 modelText.biomass<-mclapply(vifPredCombinations_new, prepareModelText,data.std )
+
+modList<-mclapply(modelText.biomass, evalTextModel,mc.preschedule = TRUE, mc.cores=5)
+
+
+modList <-modList[!sapply(modList, is.null)]
+
+modelSel1<-model.sel(modList, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
+
 
 
