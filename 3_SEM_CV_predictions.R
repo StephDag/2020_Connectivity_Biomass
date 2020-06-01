@@ -26,6 +26,9 @@ rm(list=ls())
 # load data
 rm(all.data)
 all.data<-read.csv(here("_data","FullDataMay2020Coordinates.csv"),h=T)
+# clean first column
+all.data$X.1 <- NULL
+all.data$X <- NULL
 
 colnames(all.data)
 
@@ -41,8 +44,6 @@ PredictVar$log_grav_total <- log(PredictVar$grav_total+1)
 PredictVar$log_grav_neiBR <- log(PredictVar$grav_neiBR+1)
 PredictVar$log_biomassarea1<-log(PredictVar$biomassarea1+1)
 
-summary(PredictVar)
-names(PredictVar)
 ##standrdize x variables
 rm(data.std)
 # standardize
@@ -73,7 +74,7 @@ names(data.std)
 summary(data.std)
 
 # filter data with active
-data.std <- data.std %>% filter(Larval_behaviour == "active" & ModelMode == "transi15") %>% droplevels()
+data.std <- data.std %>% filter(Larval_behaviour == "active" & ModelMode == "transi15")
 dim(data.std)
 summary(data.std)
 
@@ -103,20 +104,23 @@ str(data_train)
 ##### Create full piecewise model explaining total biomass 
 #set.seed(1234)
 rm(Biomass_TOTAL_randomList_train)
-Biomass_TOTAL_randomList_train = piecewiseSEM::psem(
+Biomass_TOTAL_randomList_train = psem(
   
   # Predicting Number of species
-  lmer(Richness ~ temp + log_grav_total+Class  + 
-       CorridorIndegreeBR+InflowBR +SelfR+ InflowMPABR+log_grav_neiBR+(1 |region),data=data.std),
-
+#  lmer(Richness ~ temp + Class +log_grav_total + log_grav_neiBR + IndegreeMPABR + 
+#       IndegreeBR + CorridorIndegreeBR + SelfR + (1 |sites/locality/region),data=data.std),
+  lmer(Richness ~ temp + Class +log_grav_total + log_grav_neiBR + IndegreeMPABR + (1 |sites/locality/region),data=data.std),
+         
   # Predicting total biomass
-  lmer(log_biomassarea1 ~ Richness+temp + log_grav_total+Class  + 
-         CorridorIndegreeBR+InflowBR +SelfR+ InflowMPABR+log_grav_neiBR+(1 |region),data=data.std)
-    # Indegree+btwdegree+Inflow+ SelfR,data=data.std)
+ #    log_grav_neiBR + IndegreeMPABR + 
+  #     IndegreeBR + CorridorIndegreeBR + SelfR+ (1 |sites/locality/region),data=data.std)
+    lmer(log_biomassarea1 ~ Richness+temp + Class +log_grav_total +  (1 |sites/locality/region),data=data.std)
+           
      
 )
 
 
+plot(Biomass_TOTAL_randomList_train)
 # sem fits
 summary(Biomass_TOTAL_randomList_train)
 
