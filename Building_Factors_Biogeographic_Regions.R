@@ -37,7 +37,6 @@
 #CorridorIndegreeBR - the number of connections with corridors (high corridor (quantile(>0.75)))
 #grav_neiBR <- average gravity of neighbours
 
-
 ###Setting factors for each reef (matrix node)###
 library(dplyr)
 library(tidyverse)

@@ -56,9 +56,9 @@ names(data.std)
 summary(data.std)
 
 # filter data with active
-data.std <- data.std %>% filter(Larval_behaviour == "active")
-dim(data.std)
-summary(data.std)
+#data.std <- data.std %>% filter(Larval_behaviour == "active")
+#dim(data.std)
+#summary(data.std)
 
 plot(data.std$Richness,data.std$log_biomassarea1)
 test <- lm(log_biomassarea1 ~ poly(Richness,3),data=data.std)
@@ -95,46 +95,65 @@ rm(data_test); data_test <- data.std[-trainIndex,]
 # built SEM model
 # scaled
 
-rm(species_mod)
-species_mod <- bf(Richness ~ poly(temp,3) + grav_total*Class + poly(Age_of_protection,3) + 
-                    Indegree+btwdegree+Inflow +SelfR+ModelMode/FE+
-                    (1 |sites/locality/region))
-#                   (1 |ModelMode/Larval_behaviour/FE))
-rm(biom_mod)
-biom_mod <- bf(log_biomassarea1 ~ poly(Richness,3)+poly(temp,3) + grav_total*Class+poly(Age_of_protection,3) +
-                 Indegree+btwdegree+Inflow+ SelfR+ModelMode/FE+
-                 (1 |sites/locality/region))
-#                 (1 |ModelMode/Larval_behaviour/FE))
-rm(biom_mod_simp)
-biom_mod_simp <- bf(log_biomassarea1 ~ poly(Richness,3)+poly(temp,3) + grav_total*Class+poly(Age_of_protection,3)+
-                      ModelMode/FE+
-                      (1 |sites/locality/region))
+rm(species_mod_FE)
+species_mod_FE <- bf(Richness ~ temp + grav_total*Class + Age_of_protection + 
+                    Indegree+btwdegree+Inflow +SelfR+ ModelMode/Larval_behaviour/FE+(1 |sites/locality/region))
+#             
+rm(biom_mod_FE)
+biom_mod_FE <- bf(log_biomassarea1 ~ Richness+temp + grav_total*Class+Age_of_protection +
+                 Indegree+btwdegree+Inflow+ SelfR+ModelMode/Larval_behaviour/FE+ (1 |sites/locality/region))
 
-random <- bf(log_biomassarea1 ~ (1 |sites/locality/region))
+rm(species_mod)
+species_mod <- bf(Richness ~ temp + grav_total*Class + Age_of_protection + 
+                       Indegree+btwdegree+Inflow +SelfR+(1 |sites/locality/region)+  (1 |ModelMode/Larval_behaviour/FE))
+
+rm(biom_mod)
+biom_mod <- bf(log_biomassarea1 ~ Richness+temp + grav_total*Class+Age_of_protection +
+                    Indegree+btwdegree+Inflow+ SelfR+(1 |sites/locality/region) +  (1 |ModelMode/Larval_behaviour/FE))
+
+rm(species_mod_simp)
+species_mod_simp <- bf(Richness ~ temp + grav_total*Class + Age_of_protection + 
+                    (1 |sites/locality/region))
+
+rm(biom_mod_simp)
+biom_mod_simp <- bf(log_biomassarea1 ~ Richness+temp + grav_total*Class+Age_of_protection +
+                 (1 |sites/locality/region))
+
 # SEM
 ## scaled
     # all_fit_brms = connectivity explains both biomass and species richness
 all_fit_brms %>% rm()
 all_fit_brms <-brm(species_mod + biom_mod + set_rescor(FALSE), data=data.std,cores=4, chains = 3,
-                   iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.95),
+                   iter = 3000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99),
                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
-    # all_fit_brms_simp = connectivity is mediated through species richness
-all_fit_brms_simp <-brm(species_mod + biom_mod_simp + set_rescor(FALSE), data=data.std,cores=4, chains = 3,
-                        iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.95),
-                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+# with FE
+all_fit_brms_FE %>% rm()
+all_fit_brms_FE <-brm(species_mod_FE + biom_mod_FE + set_rescor(FALSE), data=data.std,cores=4, chains = 3,
+                   iter = 3000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99),
+                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
+# with no connectivity
+all_fit_brms_simp %>% rm()
+all_fit_brms_simp <-brm(species_mod_simp + biom_mod_simp + set_rescor(FALSE), data=data.std,cores=4, chains = 3,
+                      iter = 3000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99),
+                      prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
 
 # check the difference between the simple and full model 
-LOO(all_fit_brms,all_fit_brms_simp)
+LOO(all_fit_brms,all_fit_brms_FE,all_fit_brms_simp)
+
+
     # the full model is the best model
 
 # summary of the full model
 summary(all_fit_brms)
-plot(all_fit_brms_r)
+plot(all_fit_brms)
+plot(all_fit_brms_FE)
 pp_check(all_fit_brms, resp="logbiomassarea1")
 pp_check(all_fit_brms, resp="Richness")
 bayes_R2(all_fit_brms)
-bayes_R2(all_fit_brms_simp)
+bayes_R2(all_fit_brms_FE)
 
 library(tidyverse)
 ggsave(plot=mcmc_plot(all_fit_brms),here("_prelim.figures","SEM_bays_extract.pdf"),width=20,height=30)
