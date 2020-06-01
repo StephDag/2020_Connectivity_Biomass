@@ -196,10 +196,11 @@ Biomass_inflow <- mcmc_intervals(posterior,c("b_logbiomassarea1_Intercept","b_lo
                           "b_logbiomassarea1_ClassRestricted","b_logbiomassarea1_log_CorridorIndegreeBR",                                    
                           "b_logbiomassarea1_log_InflowLR","b_logbiomassarea1_log_SelfR",                                                 
                           "b_logbiomassarea1_log_InflowMPABR","b_logbiomassarea1_log_InflowNeiBR"))
-Biomass
-sjstats::rope(all_fit_brms, rope = c(-1, 1))
-equi_test(all_fit_brms, out = "plot")
-hist(sqrt(data.std$Inflow))
+require(ggpubr)
+SEM_inflow <- ggarrange(Richness_inflow,Biomass_inflow,ncol=1,nrow=2,labels = c("A","B"),align="hv")
+ggsave(here("_prelim.figures","SEM_bayes_inflow_coef.pdf"),SEM_inflow ,width=10,height=8)
+
+
 
 T_cub = sign(data.std$Inflow) * abs(data.std$Inflow)^(1/3)
 library(rcompanion)
