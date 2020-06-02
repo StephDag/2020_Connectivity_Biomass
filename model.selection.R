@@ -11,14 +11,15 @@ library(ggplot2)
 library(data.table)
 library(dplyr)
 library(MuMIn)
+library(parallel)
 #_____________________________________
 #NOTES: model construction follows this convention:
 #Random effects are specified as x|g, where x is an effect and g is a grouping factor (which must be a fac- tor variable, or a nesting of/interaction among factor variables). For example, the formula would be 1|block for a random-intercept model or time|block for a model with random variation in slopes through time across groups specified by block. A model of nested random effects (block within site) would be 1|site/block; a model of crossed random effects (block and year) would be (1|block)+(1|year).
 #_____________________________________
 
-source('functions_analyses_glmmTMB.R')')
+source('functions_analyses_glmmTMB.R')
 
-all.data<-read.csv("_data/FullDataMay2020_LF.csv")
+all.data<-read.csv("_data/FullDataMay2020Coordinates.csv")
 
 colnames(all.data)
 options(stringsAsFactors = FALSE)
@@ -33,9 +34,16 @@ data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(
 #bob[] <- lapply(bob, as.character)
 
 
-data.std1<-cbind(data.std,all.data[,"biomassarea1" ],all.data[,c("Class","Larval_behaviour","FE","ModelMode")])
+
+#add spatial covariance
+all.data$pos <- numFactor(all.data$Lon, all.data$Lat)
+
+all.data$group <- factor(rep(1, nrow(all.data)))
+
+data.std1<-cbind(data.std,all.data[,"biomassarea1" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
 
 colnames(data.std1)[17]<-"biomassarea1"
+
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
@@ -88,7 +96,14 @@ modelText.biomass<-lapply(vifPredCombinations_new, prepareModelText,data.std1 )
 #set reference level for categorical variable
 data.std1$Class<-relevel( as.factor(data.std1$Class), ref="Fished" )
 
+detectCores()
+
+##run using single core
 modList<-lapply(modelText.biomass, evalTextModel)
+
+##run using multicore
+system.time({modList<-mclapply(modelText.biomass,mc.cores=12,evalTextModel)})
+
 
 findNonConverge<-lapply(modList, AIC)
 nonconv.index<-which(is.na(findNonConverge))
@@ -96,7 +111,8 @@ modList1<- modList[-nonconv.index]
 modList2<- modList1[-1]
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
-modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+#modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+modelSel1<-model.sel(modList, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 write.csv(modelSel1, 'modelSel.biom1.csv')
 
 
@@ -116,7 +132,7 @@ setDT(df1, keep.rownames = "coefficient") #put rownames into column
 names(df1) <- gsub(" ", "", names(df1)) # remove spaces from column headers
 df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 
-myPath<-"/Users/josephmaina/Documents/Mygitprojects/2020_Connectivity_Biomass/_prelim.figures/"
+myPath<-"/Users/maina/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
 df1[2:13,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
@@ -136,7 +152,7 @@ scale_color_identity()
 
 
 
-ggsave("TopModelAvgCoef.pdf",path = myPath,width = 8, height = 8)
+ggsave("TopModelAvgCoef_1june.pdf",path = myPath,width = 8, height = 8)
 unlink("TopModelAvgCoef.pdf")
 
 save.image("modelSelection.RData")
