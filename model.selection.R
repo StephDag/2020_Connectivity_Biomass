@@ -25,10 +25,9 @@ colnames(all.data)
 options(stringsAsFactors = FALSE)
 #PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","Indegree","btwdegree","Inflow","Outdegr#ee","InflowLR","SelfR","Class","FE")]
 
-PredictVar<-all.data[,c("temp","Richness","grav_neiBR","Age_of_protection","IndegreeBR","btwdegree","InflowBR","Outdegree","InflowLR","SelfR","IndegreeMPABR","CorridorIndegreeBR","grav_neiBR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","Class","FE")]
-
+PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","btwdegree","SelfR","InflowBR","IndegreeBR", "CorridorIndegreeBR", "grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","Class","FE")]
 ##standrdize 16 predicctor variables
-data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar[,1:14], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 #convert facrtor to character
 #bob[] <- lapply(bob, as.character)
@@ -42,7 +41,7 @@ all.data$group <- factor(rep(1, nrow(all.data)))
 
 data.std1<-cbind(data.std,all.data[,"biomassarea1" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
 
-colnames(data.std1)[17]<-"biomassarea1"
+colnames(data.std1)[15]<-"biomassarea1"
 
 
 #1. Create list with all possible combinations between predictors 
@@ -158,4 +157,5 @@ unlink("TopModelAvgCoef.pdf")
 save.image("modelSelection.RData")
 
 
+         
 
