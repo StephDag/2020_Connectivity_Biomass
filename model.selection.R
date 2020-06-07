@@ -19,29 +19,33 @@ library(parallel)
 
 source('functions_analyses_glmmTMB.R')
 
-all.data<-read.csv("_data/FullDataMay2020Coordinates.csv")
+all.data<-read.csv("_data/FullDataBiomassJune2020.csv")
 
 colnames(all.data)
 options(stringsAsFactors = FALSE)
 #PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","Indegree","btwdegree","Inflow","Outdegr#ee","InflowLR","SelfR","Class","FE")]
 
-PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","btwdegree","SelfR","InflowBR","IndegreeBR", "CorridorIndegreeBR", "grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","Class","FE")]
+PredictVar<-all.data[,c("Richness","grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
+
+
+PredictVar[] <- sapply(PredictVar, function(x) if (is.factor(x)) as.character(x) else x) 
+
 ##standrdize 16 predicctor variables
-data.std<-data.frame(apply(X = PredictVar[,1:14], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 #convert facrtor to character
 #bob[] <- lapply(bob, as.character)
-
-
 
 #add spatial covariance
 all.data$pos <- numFactor(all.data$Lon, all.data$Lat)
 
 all.data$group <- factor(rep(1, nrow(all.data)))
 
-data.std1<-cbind(data.std,all.data[,"biomassarea1" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
+data.std1<-cbind(data.std,all.data[,"biomassarea" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
 
-colnames(data.std1)[15]<-"biomassarea1"
+data.std1[] <- sapply(data.std1, function(x) if (is.factor(x)) as.character(x) else x) 
+
+colnames(data.std1)[16]<-"biomassarea1"
 
 
 #1. Create list with all possible combinations between predictors 
@@ -101,7 +105,7 @@ detectCores()
 modList<-lapply(modelText.biomass, evalTextModel)
 
 ##run using multicore
-system.time({modList<-mclapply(modelText.biomass,mc.cores=12,evalTextModel)})
+system.time({modList<-mclapply(modelText.biomass,mc.cores=8,evalTextModel)})
 
 
 findNonConverge<-lapply(modList, AIC)
