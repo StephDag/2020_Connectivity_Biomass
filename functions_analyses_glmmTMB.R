@@ -58,7 +58,7 @@ prepareModelText  <-  function(Predictors, data) {
   }
   #paste0('glmmTMB(vci ~', fixStep,'+ (1|layer) + ',ranStep1,', family=beta_family(link = "logit")',',data=data.std)')
   
-  paste0('glmmTMB(biomassarea1 ~', fixStep,'+ (1|ModelMode/Larval_behaviour/FE) + 1|region',',family=Gamma("log")',',data=data.std1)')
+  paste0('glmmTMB(biomassarea1 ~', fixStep,'+ (1|ModelMode/Larval_behaviour/FE) + (1|region)',',family=Gamma("log")',',data=data.std1)')
      #+ exp(pos + 0|group)
   #paste0('glmmTMB(vci ~', fixStep,'+(1|layer), family=beta_family(link = "logit")',',data=train)')
   #lapply(seq_along(respVar), function(i) paste0('glmmadmb(',colnames(respVar)[i], '~', fixStep,'+ (1|location)',', family="beta",link="logit"',', data=data.stds,admb.opts=admbControl(shess=FALSE,noinit=FALSE, impSamp=200,maxfn=1000,imaxfn=500,maxph=5))'))

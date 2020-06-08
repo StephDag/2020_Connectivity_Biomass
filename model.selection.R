@@ -28,7 +28,7 @@ options(stringsAsFactors = FALSE)
 PredictVar<-all.data[,c("Richness","grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
 
 
-PredictVar[] <- sapply(PredictVar, function(x) if (is.factor(x)) as.character(x) else x) 
+#PredictVar[] <- sapply(PredictVar, function(x) if (is.factor(x)) as#.character(x) else x) 
 
 ##standrdize 16 predicctor variables
 data.std<-data.frame(apply(X = PredictVar[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
@@ -43,7 +43,7 @@ all.data$group <- factor(rep(1, nrow(all.data)))
 
 data.std1<-cbind(data.std,all.data[,"biomassarea" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
 
-data.std1[] <- sapply(data.std1, function(x) if (is.factor(x)) as.character(x) else x) 
+#data.std1[] <- sapply(data.std1, function(x) if (is.factor(x)) as.character(x) else x) 
 
 colnames(data.std1)[16]<-"biomassarea1"
 
@@ -116,10 +116,11 @@ modList2<- modList1[-1]
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 modelSel1<-model.sel(modList, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel1, 'modelSel.biom1.csv')
+write.csv(modelSel1, 'modelSel.biom_june.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
+
 top.model<-get.models(modelSel1, subset=delta<2)
 
 topModelAve<-model.avg(top.model) 
@@ -135,10 +136,10 @@ setDT(df1, keep.rownames = "coefficient") #put rownames into column
 names(df1) <- gsub(" ", "", names(df1)) # remove spaces from column headers
 df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 
-myPath<-"/Users/maina/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/"
+myPath<-"/Users/josephmaina/Documents/Mygitprojects/2020_Connectivity_Biomass"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:13,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:17,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -155,7 +156,7 @@ scale_color_identity()
 
 
 
-ggsave("TopModelAvgCoef_1june.pdf",path = myPath,width = 8, height = 8)
+ggsave("TopModelAvgCoef_8june.pdf",path = myPath,width = 8, height = 8)
 unlink("TopModelAvgCoef.pdf")
 
 save.image("modelSelection.RData")
