@@ -503,6 +503,11 @@ SEM_inflow_tot_weight <- round(rbind(TRANSIENT.weight,RESID.weight,PARENTAL.weig
 colnames(SEM_inflow_tot_weight) <- c("Model1_Full","Model2_Smed","Model3_noCon")
 rownames(SEM_inflow_tot_weight) <- c("TRANSIENT","RESIDENT","PARENTAL","CRYPTIC")
 
+require(kableExtra)
+SEM_inflow_tot_weight.table <- SEM_inflow_tot_weight  %>%
+kable(align="c") %>%
+  kable_styling() %>%
+  save_kable("_prelim.figures/SEM_bayes_inflow_weight_FE.png")
 
 SEM_inflow_tot_R2 <- round(rbind(TRANSIENT.R2[,1],RESID.R2[,1],PARENTAL.R2[,1],CRYPTIC.R2[,1]),2)
 colnames(SEM_inflow_tot_R2) <- c("Model1_Full_S","Model1_Full_B","Model2_Smed_S","Model2_Smed_B","Model3_noCon_S","Model3_noCon_B")
@@ -510,6 +515,21 @@ rownames(SEM_inflow_tot_R2) <- c("TRANSIENT",
                                      "RESIDENT",
                                      "PARENTAL",
                                      "CRYPTIC")
+SEM_inflow_tot_R2.table <- SEM_inflow_tot_R2  %>%
+  kable(align="c") %>%
+  kable_styling() %>%
+  save_kable("_prelim.figures/SEM_bayes_inflow_R2_FE.png")
+
+
+
+
+
+
+
+
+
+
+
 
 # with latitude
 posterior_lat <- as.array(all_fit_brms_lat)
