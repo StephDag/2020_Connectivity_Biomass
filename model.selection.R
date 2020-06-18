@@ -4,14 +4,7 @@
 ##creating all possible combinations 
 ##fitting linear models of gamma family
 
-rm(list=ls())
-library(usdm)
-library(glmmTMB)
-library(ggplot2)
-library(data.table)
-library(dplyr)
-library(MuMIn)
-library(parallel)
+
 #_____________________________________
 #NOTES: model construction follows this convention:
 #Random effects are specified as x|g, where x is an effect and g is a grouping factor (which must be a fac- tor variable, or a nesting of/interaction among factor variables). For example, the formula would be 1|block for a random-intercept model or time|block for a model with random variation in slopes through time across groups specified by block. A model of nested random effects (block within site) would be 1|site/block; a model of crossed random effects (block and year) would be (1|block)+(1|year).
@@ -25,13 +18,13 @@ colnames(all.data)
 options(stringsAsFactors = FALSE)
 #PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","Indegree","btwdegree","Inflow","Outdegr#ee","InflowLR","SelfR","Class","FE")]
 
-PredictVar<-all.data[,c("Richness","grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
+PredictVar<-all.data[,c("grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
 
 
 #PredictVar[] <- sapply(PredictVar, function(x) if (is.factor(x)) as#.character(x) else x) 
 
 ##standrdize 16 predicctor variables
-data.std<-data.frame(apply(X = PredictVar[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar[,1:14], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 #convert facrtor to character
 #bob[] <- lapply(bob, as.character)
@@ -41,11 +34,11 @@ all.data$pos <- numFactor(all.data$Lon, all.data$Lat)
 
 all.data$group <- factor(rep(1, nrow(all.data)))
 
-data.std1<-cbind(data.std,all.data[,"biomassarea" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
+data.std1<-cbind(data.std,all.data[,"Richness" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
 
 #data.std1[] <- sapply(data.std1, function(x) if (is.factor(x)) as.character(x) else x) 
 
-colnames(data.std1)[16]<-"biomassarea1"
+colnames(data.std1)[15]<-"Richness"
 
 
 #1. Create list with all possible combinations between predictors 
@@ -108,14 +101,14 @@ modList<-lapply(modelText.biomass, evalTextModel)
 system.time({modList<-mclapply(modelText.biomass,mc.cores=8,evalTextModel)})
 
 
-findNonConverge<-lapply(modList, AIC)
+findNonConverge<-lapply(modList.richness, AIC)
 nonconv.index<-which(is.na(findNonConverge))
 modList1<- modList[-nonconv.index]
 modList2<- modList1[-1]
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-modelSel1<-model.sel(modList, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+modelSel1<-model.sel(modList1, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 write.csv(modelSel1, 'modelSel.biom_june.csv')
 
 
@@ -156,11 +149,14 @@ scale_color_identity()
 
 
 
-ggsave("TopModelAvgCoef_8june.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef.pdf")
+ggsave("TopModelAvgCoef_spp_rich_june.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_spp_rich_june.pdf")
 
-save.image("modelSelection.RData")
 
+save.image("~/Documents/Mygitprojects/localfiles/modelSelection_biomass.RData")
+
+
+load('~/Documents/Mygitprojects/localfiles/modelSelection_biomass.RData')
 
          
 
