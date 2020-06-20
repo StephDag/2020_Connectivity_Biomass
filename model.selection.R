@@ -4,6 +4,22 @@
 ##creating all possible combinations 
 ##fitting linear models of gamma family
 
+rm(list=ls())
+library(usdm)
+library(glmmTMB)
+library(ggplot2)
+library(data.table)
+library(dplyr)
+library(MuMIn)
+library(parallel)
+
+library(ape) #Version 3.3
+library(caper) # Vresion 0.5.2
+library(nlme) # Version 3.1.122
+library(lavaan) # Version 0.5.19
+# Load piecewiseSEM from CRAN
+library(piecewiseSEM) # Version 1.0.0
+
 
 #_____________________________________
 #NOTES: model construction follows this convention:
@@ -109,11 +125,10 @@ modList2<- modList1[-1]
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 modelSel1<-model.sel(modList1, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel1, 'modelSel.biom_june.csv')
+write.csv(modelSel1, 'modSelSel.biom_june.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
-
 top.model<-get.models(modelSel1, subset=delta<2)
 
 topModelAve<-model.avg(top.model) 
@@ -158,5 +173,5 @@ save.image("~/Documents/Mygitprojects/localfiles/modelSelection_biomass.RData")
 
 load('~/Documents/Mygitprojects/localfiles/modelSelection_biomass.RData')
 
-         
+
 
