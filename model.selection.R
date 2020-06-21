@@ -32,15 +32,19 @@ all.data<-read.csv("_data/FullDataBiomassJune2020.csv")
 
 colnames(all.data)
 options(stringsAsFactors = FALSE)
-#PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","Indegree","btwdegree","Inflow","Outdegr#ee","InflowLR","SelfR","Class","FE")]
 
-PredictVar<-all.data[,c("grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
+PredictVar<-all.data[,c("Richness","grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
 
 
-#PredictVar[] <- sapply(PredictVar, function(x) if (is.factor(x)) as#.character(x) else x) 
+PredictVar_R<-all.data[,c("grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Class","FE")]
+
+PredictVar[,16:17] <- sapply(PredictVar[,16:17], function(x) if (is.factor(x)) as.character(x) else x)
+PredictVar_R[,15:16] <- sapply(PredictVar[,15:16], function(x) if (is.factor(x)) as.character(x) else x)
 
 ##standrdize 16 predicctor variables
-data.std<-data.frame(apply(X = PredictVar[,1:14], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+
+data.std<-data.frame(apply(X = PredictVar[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+
 
 #convert facrtor to character
 #bob[] <- lapply(bob, as.character)
@@ -50,17 +54,20 @@ all.data$pos <- numFactor(all.data$Lon, all.data$Lat)
 
 all.data$group <- factor(rep(1, nrow(all.data)))
 
-data.std1<-cbind(data.std,all.data[,"Richness" ],all.data[,c("pos","group","region","Class","Larval_behaviour","FE","ModelMode")])
+all.dataChar<-all.data[,c("region","Class","Larval_behaviour","FE","ModelMode")]
 
-#data.std1[] <- sapply(data.std1, function(x) if (is.factor(x)) as.character(x) else x) 
+all.dataChar[] <- sapply(all.dataChar, function(x) if (is.factor(x)) as.character(x) else x)
 
-colnames(data.std1)[15]<-"Richness"
+data.std1<-cbind(data.std,all.data[,c("Richness","biomassarea")],all.data[,c("pos","group")],all.dataChar)
 
+colnames(data.std1)[16]<-"Richness_resp"
+colnames(data.std1)[17]<-"Biomass_resp"
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)#
-
+#varnames<-colnames(PredictVar)
+varnames<-colnames(PredictVar_R)
+##
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
 vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombinations)
@@ -68,7 +75,8 @@ vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombina
 
 ##2. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)#
+#varnames<-colnames(PredictVar)#
+varnames<-colnames(PredictVar_R)
 
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -103,7 +111,12 @@ next
 }
 
 ##configure models
-modelText.biomass<-lapply(vifPredCombinations_new, prepareModelText,data.std1 )
+#vifPredCombinations_biom<-vifPredCombinations_new
+#vifPredCombinations_rich<-vifPredCombinations_new
+rm(vifPredCombinations_new)
+
+modelText.biom<-lapply(vifPredCombinations_biom, prepareModelText,data.std1 )
+modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
 
 #set reference level for categorical variable
 data.std1$Class<-relevel( as.factor(data.std1$Class), ref="Fished" )
@@ -111,21 +124,24 @@ data.std1$Class<-relevel( as.factor(data.std1$Class), ref="Fished" )
 detectCores()
 
 ##run using single core
-modList<-lapply(modelText.biomass, evalTextModel)
+modList.biom<-lapply(modelText.biom, evalTextModel)
+
+modList.rich<-lapply(modelText.rich, evalTextModel)
+
 
 ##run using multicore
 system.time({modList<-mclapply(modelText.biomass,mc.cores=8,evalTextModel)})
 
 
-findNonConverge<-lapply(modList.richness, AIC)
+findNonConverge<-lapply(modList.biom, AIC)
 nonconv.index<-which(is.na(findNonConverge))
 modList1<- modList[-nonconv.index]
 modList2<- modList1[-1]
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-modelSel1<-model.sel(modList1, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel1, 'modSelSel.biom_june.csv')
+modelSel.biom<-model.sel(modList.biom, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+write.csv(modelSel.biom, 'modSelSel.biom_june_21.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
