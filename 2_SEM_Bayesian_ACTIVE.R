@@ -79,6 +79,13 @@ library(corrgram)
 corrgram(TRANSIENT,order=TRUE, lower.panel=panel.shade,
          upper.panel=panel.pie, text.panel=panel.txt)
 
+connectivity <- all.data[,c("InflowLR","SelfR","InflowBR","IndegreeBR",        
+                         "CorridorIndegreeBR","IndegreeMPABR","InflowMPABR",       
+                         "IndegreeNeiBR","InflowNeiBR","InflowLRBR","Outdegree")] 
+corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
+         upper.panel=panel.cor, text.panel=panel.txt)
+ggsave(here("_prelim.figures","Corr_connectivity.pdf"),corr.connectivity,width=20,height=12)
+
 ## standrdize x variables
 rm(TRANSIENT.std)
 TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c(5,6,11,12,15:22,27:35)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
@@ -253,10 +260,19 @@ rm(species_mod_inflow) # ENV + CON
 species_mod_inflow <- bf(Richness ~ temp + log_grav_total + Class  + 
                     log_InflowLR +log_SelfR + log_CorridorIndegreeBR +(1+ log_grav_total +log_SelfR +log_CorridorIndegreeBR |region))
 
-rm(biom_mod_inflow) # ENV + CON +S 
+rm(species_mod_inflow.nocor) # ENV + CON
+species_mod_inflow.nocor <- bf(Richness ~ temp + log_grav_total + Class  + 
+                           log_InflowLR +log_SelfR +(1+ log_grav_total +log_SelfR  |region))
+
+rm(biom_mod_inflow.tot) # ENV + CON +S 
 biom_mod_inflow.tot <- bf(log_biomassarea ~ Richness+temp + log_grav_total + Class  + 
                         log_InflowLR +log_SelfR + log_CorridorIndegreeBR +
                         (1+ log_grav_total + log_InflowLR +  log_SelfR +log_CorridorIndegreeBR  |region))
+
+rm(biom_mod_inflow.tot.nocor) # ENV + CON +S 
+biom_mod_inflow.tot.nocor <- bf(log_biomassarea ~ Richness+temp + log_grav_total + Class  + 
+                            log_InflowLR +log_SelfR +
+                            (1+ log_grav_total + log_InflowLR +  log_SelfR |region))
 
 rm(biom_mod_inflow.simp) # ENV + CON
 biom_mod_inflow.simp <- bf(log_biomassarea ~ temp + log_grav_total + Class  + 
@@ -301,6 +317,11 @@ all_fit_brms.tot.TRANSIENT <-brm(species_mod_inflow + biom_mod_inflow.tot + set_
                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
+all_fit_brms.tot.TRANSIENT.nocor %>% rm()  # Full - connectivity through both S and B
+all_fit_brms.tot.TRANSIENT.nocor <-brm(species_mod_inflow.nocor + biom_mod_inflow.tot.nocor + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
+                                 iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                                 prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
 all_fit_brms.nocon.S.TRANSIENT %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.TRANSIENT <-brm(species_mod_inflow + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
@@ -343,6 +364,11 @@ all_fit_brms.tot.RESID <-brm(species_mod_inflow + biom_mod_inflow.tot + set_resc
                                  iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                  prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
+all_fit_brms.tot.RESID.nocor %>% rm()  # Full - connectivity through both S and B
+all_fit_brms.tot.RESID.nocor <-brm(species_mod_inflow.nocor + biom_mod_inflow.tot.nocor + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
+                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
 all_fit_brms.nocon.S.RESID %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.RESID <-brm(species_mod_inflow + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
@@ -380,6 +406,12 @@ all_fit_brms.tot.PARENTAL <-brm(species_mod_inflow + biom_mod_inflow.tot + set_r
                              iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                              prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
+all_fit_brms.tot.PARENTAL.nocor %>% rm()  # Full - connectivity through both S and B
+all_fit_brms.tot.PARENTAL.nocor <-brm(species_mod_inflow.nocor + biom_mod_inflow.tot.nocor + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
+                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
+
 all_fit_brms.nocon.S.PARENTAL %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.PARENTAL <-brm(species_mod_inflow + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                  iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
@@ -415,6 +447,11 @@ all_fit_brms.tot.CRYPTIC <-brm(species_mod_inflow + biom_mod_inflow.tot + set_re
                                 iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                 prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
+all_fit_brms.tot.CRYPTIC.nocor %>% rm()  # Full - connectivity through both S and B
+all_fit_brms.tot.CRYPTIC.nocor <-brm(species_mod_inflow.nocor + biom_mod_inflow.tot.nocor + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
+                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+
 all_fit_brms.nocon.S.CRYPTIC %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.CRYPTIC <-brm(species_mod_inflow + biom_mod_nocon.S + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
                                     iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
@@ -429,12 +466,18 @@ CRYPTIC.weight <- model_weights(all_fit_brms.tot.CRYPTIC,
               all_fit_brms.nocon.S.CRYPTIC,
               all_fit_brms.nocon.CRYPTIC,weights = "loo")
 
+
+
+bayes_R2(all_fit_brms.tot.CRYPTIC.nocor)
+mcmc_plot(all_fit_brms.tot.CRYPTIC.nocor)
+
 CRYPTIC.LOO <- LOO(all_fit_brms.tot.CRYPTIC,
     all_fit_brms.nocon.S.CRYPTIC,
-    all_fit_brms.nocon.CRYPTIC)
+    all_fit_brms.nocon.CRYPTIC,all_fit_brms.tot.CRYPTIC.nocor)
+
 WAIC(all_fit_brms.tot.CRYPTIC,
      all_fit_brms.nocon.S.CRYPTIC,
-     all_fit_brms.nocon.CRYPTIC)
+     all_fit_brms.nocon.CRYPTIC,all_fit_brms.tot.CRYPTIC.nocor)
 mcmc_plot(all_fit_brms.tot.CRYPTIC)
 mcmc_plot(all_fit_brms.nocon.S.CRYPTIC)
 
