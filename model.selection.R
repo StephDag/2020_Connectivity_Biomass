@@ -41,8 +41,8 @@ PredictVar_R[,16:17] <- sapply(PredictVar[,15:16], function(x) if (is.factor(x))
 
 ##standrdize 16 predicctor variables
 
-data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
-#data.std<-data.frame(apply(X = PredictVar_R[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+#data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar_R[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 
 #convert facrtor to character
@@ -64,8 +64,8 @@ colnames(data.std1)[18]<-"Biomass_resp"
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)
-#varnames<-colnames(PredictVar_R)
+#varnames<-colnames(PredictVar)
+varnames<-colnames(PredictVar_R)
 ##
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -74,8 +74,8 @@ vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombina
 
 ##2. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)#
-#varnames<-colnames(PredictVar_R)
+#varnames<-colnames(PredictVar)#
+varnames<-colnames(PredictVar_R)
 
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
