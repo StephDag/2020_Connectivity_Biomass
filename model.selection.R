@@ -141,19 +141,19 @@ modList.biom<- modList.biom[-nonconv.index]
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 modelSel.biom<-model.sel(modList.biom, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel.biom, 'modSelSel.richness_june_23.csv')
+write.csv(modelSel.biom, 'modSelSel.biomass_june_24.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
 top.model.biom<-get.models(modelSel.biom, subset=delta<2)
 
-topModelAve.r<-model.avg(top.model.rich) 
+topModelAve.b<-model.avg(top.model.biom) 
 
 
-mA<-summary(topModelAve.r) #pulling out model averages
+mA<-summary(topModelAve.b) #pulling out model averages
 df1<-as.data.frame(mA$coefmat.full) #selecting full model coefficient averages
 
-CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
+CI <- as.data.frame(confint(topModelAve.b, full=T)) # get confidence intervals for full model
 df1$CI.min <-CI$`2.5 %` #pulling out CIs and putting into same df as coefficient estimates
 df1$CI.max <-CI$`97.5 %`# order of coeffients same in both, so no mixups; but should check anyway
 setDT(df1, keep.rownames = "coefficient") #put rownames into column
@@ -180,6 +180,8 @@ scale_color_identity()
 
 ggsave("TopModelAvgCoef_biomass_june24.pdf",path = myPath,width = 8, height = 8)
 unlink("TopModelAvgCoef_biomass_june24.pdf")
+
+write.csv(df1, 'model.averaged.coefficients.csv')
 
 #save worksopace to Luisa's drive
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
