@@ -28,21 +28,22 @@ library(piecewiseSEM) # Version 1.0.0
 
 source('functions_analyses_glmmTMB.R')
 
-all.data<-read.csv("_data/FullDataBiomassJune2020.csv")
+all.data<-read.csv("_data/DataBiomassConnectivityBR.csv")
 
 colnames(all.data)
 options(stringsAsFactors = FALSE)
 
-PredictVar<-all.data[,c("Richness","grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Outdegree","Class","FE")]
-PredictVar_R<-all.data[,c("grav_total","Age_of_protection","btwdegree","InflowLR","SelfR","InflowBR","IndegreeBR","CorridorIndegreeBR","grav_neiBR","IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","InflowLRBR","Outdegree","Class","FE")]
+PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","SelfR","InflowBR", "IndegreeBR","CorridorIndegreeBR","grav_neiBR", "IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree","Class","FE")]
 
-PredictVar[,17:18] <- sapply(PredictVar[,16:17], function(x) if (is.factor(x)) as.character(x) else x)
-PredictVar_R[,16:17] <- sapply(PredictVar[,15:16], function(x) if (is.factor(x)) as.character(x) else x)
+PredictVar_R<-all.data[,c("temp","grav_total","Age_of_protection","SelfR","InflowBR", "IndegreeBR","CorridorIndegreeBR","grav_neiBR", "IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree","Class","FE")]
+
+PredictVar[,17:18] <- sapply(PredictVar[,17:18], function(x) if (is.factor(x)) as.character(x) else x)
+PredictVar_R[,16:17] <- sapply(PredictVar_R[,16:17], function(x) if (is.factor(x)) as.character(x) else x)
 
 ##standrdize 16 predicctor variables
 
-#data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
-data.std<-data.frame(apply(X = PredictVar_R[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+#data.std<-data.frame(apply(X = PredictVar_R[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 
 #convert facrtor to character
@@ -57,15 +58,15 @@ all.dataChar<-all.data[,c("region","Class","Larval_behaviour","FE","ModelMode")]
 
 all.dataChar[] <- sapply(all.dataChar, function(x) if (is.factor(x)) as.character(x) else x)
 
-data.std1<-cbind(data.std,all.data[,c("Richness","biomassarea")],all.data[,c("pos","group")],all.dataChar)
+data.std1<-cbind(data.std,all.data[,c("Richness","biomassarea1")],all.dataChar)
 
 colnames(data.std1)[17]<-"Richness_resp"
 colnames(data.std1)[18]<-"Biomass_resp"
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-#varnames<-colnames(PredictVar)
-varnames<-colnames(PredictVar_R)
+varnames<-colnames(PredictVar)
+#varnames<-colnames(PredictVar_R)
 ##
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -74,8 +75,8 @@ vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombina
 
 ##2. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-#varnames<-colnames(PredictVar)#
-varnames<-colnames(PredictVar_R)
+varnames<-colnames(PredictVar)#
+#varnames<-colnames(PredictVar_R)
 
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -128,7 +129,9 @@ detectCores()
 #modList.rich<-lapply(modelText.rich, evalTextModel)
 
 ##run using multicore
-system.time({modList.biom<-mclapply(modelText.biom,mc.cores=8,evalTextModel)})
+system.time({modList.biom<-mclapply(modelText.biom,mc.cores=24,evalTextModel)})
+
+#system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
 findNonConverge<-lapply(modList.biom, AIC)
 nonconv.index<-which(is.na(findNonConverge))
@@ -138,19 +141,19 @@ modList.biom<- modList.biom[-nonconv.index]
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 modelSel.biom<-model.sel(modList.biom, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel.biom, 'modSelSel.biom_june_2.csv')
+write.csv(modelSel.biom, 'modSelSel.richness_june_23.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
 top.model.biom<-get.models(modelSel.biom, subset=delta<2)
 
-topModelAve.b<-model.avg(top.model.biom) 
+topModelAve.r<-model.avg(top.model.rich) 
 
 
-mA<-summary(topModelAve.b) #pulling out model averages
+mA<-summary(topModelAve.r) #pulling out model averages
 df1<-as.data.frame(mA$coefmat.full) #selecting full model coefficient averages
 
-CI <- as.data.frame(confint(topModelAve.b, full=T)) # get confidence intervals for full model
+CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
 df1$CI.min <-CI$`2.5 %` #pulling out CIs and putting into same df as coefficient estimates
 df1$CI.max <-CI$`97.5 %`# order of coeffients same in both, so no mixups; but should check anyway
 setDT(df1, keep.rownames = "coefficient") #put rownames into column
@@ -160,7 +163,7 @@ df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 myPath<-"~/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/_prelim.figures/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:12,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:14,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -175,8 +178,8 @@ scale_color_identity()
 # geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="pink", # CIs
 #              width=.2,lwd=1) 
 
-ggsave("TopModelAvgCoef_biom_june22.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef_biom_june22.pdf")
+ggsave("TopModelAvgCoef_biomass_june24.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_biomass_june24.pdf")
 
 #save worksopace to Luisa's drive
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
