@@ -44,8 +44,8 @@ PredictVar_R[,17:18] <- sapply(PredictVar_R[,17:18], function(x) if (is.factor(x
 
 ##standrdize 16 predicctor variables
 
-data.std<-data.frame(apply(X = PredictVar[,1:17], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
-#data.std<-data.frame(apply(X = PredictVar_R[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+#data.std<-data.frame(apply(X = PredictVar[,1:17], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar_R[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 
 #convert facrtor to character
@@ -62,13 +62,13 @@ all.dataChar[] <- sapply(all.dataChar, function(x) if (is.factor(x)) as.characte
 
 data.std1<-cbind(data.std,all.data[,c("Richness","biomassarea1")],all.dataChar)
 
-colnames(data.std1)[18]<-"Richness_resp"
-colnames(data.std1)[19]<-"Biomass_resp"
+colnames(data.std1)[17]<-"Richness_resp"
+colnames(data.std1)[18]<-"Biomass_resp"
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)
-#varnames<-colnames(PredictVar_R)
+#varnames<-colnames(PredictVar)
+varnames<-colnames(PredictVar_R)
 ##
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -77,8 +77,8 @@ vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombina
 
 ##2. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
-varnames<-colnames(PredictVar)#
-#varnames<-colnames(PredictVar_R)
+#varnames<-colnames(PredictVar)#
+varnames<-colnames(PredictVar_R)
 
 maxCombs  <-  getMaximumNOfCombs(varnames)
 for(j in 1:maxCombs) {
@@ -88,7 +88,7 @@ vifPredCombinations  <-  append(runPredCombinations(j, varnames), vifPredCombina
 ##3. filter the combinations above with VIF<1.5
 vifPredCombinations_new<- c()
 for(con in vifPredCombinations){
-r <- subset(PredictVar, select = con)
+r <- subset(PredictVar_R, select = con)
 conClasses   <-  unique(sapply(r, class))
 numOfClasses  <-  length(conClasses)
 twoNCols <- ncol(r)==2
@@ -114,14 +114,14 @@ next
 
 
 ##configure models
-vifPredCombinations_biom<-vifPredCombinations_new[1:18000]
-vifPredCombinations_biom_set2<-vifPredCombinations_new[18001:35476]
-#vifPredCombinations_rich<-vifPredCombinations_new
+#vifPredCombinations_biom<-vifPredCombinations_new[1:18000]
+#vifPredCombinations_biom_set2<-vifPredCombinations_new[18001:35476]
+vifPredCombinations_rich<-vifPredCombinations_new
 #rm(vifPredCombinations_new)
 
-modelText.biom<-lapply(vifPredCombinations_biom, prepareModelText,data.std1 )
-modelText.biom_set2<-lapply(vifPredCombinations_biom_set2, prepareModelText,data.std1 )
-#modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
+#modelText.biom<-lapply(vifPredCombinations_biom, prepareModelText,data.std1 )
+#modelText.biom_set2<-lapply(vifPredCombinations_biom_set2, prepareModelText,data.std1 )
+modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
 
 #set reference level for categorical variable
 data.std1$Class<-relevel( as.factor(data.std1$Class), ref="Fished" )
@@ -135,14 +135,20 @@ detectCores()
 ##run using multicore
 system.time({modList.biom_set2<-mclapply(modelText.biom_set2,mc.cores=24,evalTextModel)})
 
+##run using multicore
+system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
+
+
+
+
 #merge lists of models
 modList.biom.full<-append(modList.biom,modList.biom_set2)
 
 #system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
-findNonConverge<-lapply(modList.biom.full, AIC)
+findNonConverge<-lapply(modList.rich, AIC)
 nonconv.index<-which(is.na(findNonConverge))
-modList.biom.full<- modList.biom.full[-nonconv.index]
+modList.rich<- modList.rich[-nonconv.index]
 #modList2<- modList1[-1]
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
@@ -151,16 +157,22 @@ modelSel.biom<-model.sel(modList.biom.full, rank.args = list(REML = FALSE),extra
 write.csv(modelSel.biom, 'modSelSel.biomass_june_27.csv')
 
 
+modelSel.rich<-model.sel(modList.rich, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+write.csv(modelSel.rich, 'modSelSel.rich_june_28.csv')
+
+
+
+
 #top.model<-get.models(modelSel, subset=delta<2)
-top.model.biom<-get.models(modelSel.biom, subset=delta<2)
+top.model.rich<-get.models(modelSel.rich, subset=delta<2)
 
-topModelAve.b<-model.avg(top.model.biom) 
+topModelAve.r<-model.avg(top.model.rich) 
 
 
-mA<-summary(topModelAve.b) #pulling out model averages
+mA<-summary(topModelAve.r) #pulling out model averages
 df1<-as.data.frame(mA$coefmat.full) #selecting full model coefficient averages
 
-CI <- as.data.frame(confint(topModelAve.b, full=T)) # get confidence intervals for full model
+CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
 df1$CI.min <-CI$`2.5 %` #pulling out CIs and putting into same df as coefficient estimates
 df1$CI.max <-CI$`97.5 %`# order of coeffients same in both, so no mixups; but should check anyway
 setDT(df1, keep.rownames = "coefficient") #put rownames into column
@@ -170,7 +182,7 @@ df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 myPath<-"~/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/_prelim.figures/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:19,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:15,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -185,16 +197,18 @@ scale_color_identity()
 # geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="pink", # CIs
 #              width=.2,lwd=1) 
 
-ggsave("TopModelAvgCoef_biomass_june27.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef_biomass_june27.pdf")
+ggsave("TopModelAvgCoef_richness_june28.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_richness_june28.pdf")
 
-write.csv(df1, 'model.averaged.coefficients.csv')
+write.csv(df1, 'model.averaged.coefficients_richness.csv')
 
 #save worksopace to Luisa's drive
 #save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
+save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_richness.RData",compress="xz")
 #load('/Volumes/LuisaDrive/ModelSel/variableCombinationForModels.RData')
+
 load(("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData"))
 
 
