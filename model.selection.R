@@ -28,22 +28,24 @@ library(piecewiseSEM) # Version 1.0.0
 
 source('functions_analyses_glmmTMB.R')
 
-all.data<-read.csv("_data/DataBiomassConnectivityBR.csv")
+all.data<-read.csv("_data/Connectivity_Biomass_SEMGLMMDATA.csv")
 
 colnames(all.data)
 options(stringsAsFactors = FALSE)
 
-PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","SelfR","InflowBR", "IndegreeBR","CorridorIndegreeBR","grav_neiBR", "IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree","Class","FE")]
+PredictVar<-all.data[,c("temp","Richness","grav_total","Age_of_protection","OutFlow","Outdegree","btwdegree","SelfR","Inflow","Indegree","CorridorIndegree","grav_nei","IndegreeMPA","InflowMPA","IndegreeNei","InflowNei","Netflow","FE","Class"             
+)]
 
-PredictVar_R<-all.data[,c("temp","grav_total","Age_of_protection","SelfR","InflowBR", "IndegreeBR","CorridorIndegreeBR","grav_neiBR", "IndegreeMPABR","InflowMPABR","IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree","Class","FE")]
+PredictVar_R<-all.data[,c("temp","grav_total","Age_of_protection","OutFlow","Outdegree","btwdegree","SelfR","Inflow","Indegree","CorridorIndegree","grav_nei","IndegreeMPA","InflowMPA","IndegreeNei","InflowNei","Netflow","FE","Class"             
+)]
 
-PredictVar[,17:18] <- sapply(PredictVar[,17:18], function(x) if (is.factor(x)) as.character(x) else x)
-PredictVar_R[,16:17] <- sapply(PredictVar_R[,16:17], function(x) if (is.factor(x)) as.character(x) else x)
+PredictVar[,18:19] <- sapply(PredictVar[,18:19], function(x) if (is.factor(x)) as.character(x) else x)
+PredictVar_R[,17:18] <- sapply(PredictVar_R[,17:18], function(x) if (is.factor(x)) as.character(x) else x)
 
 ##standrdize 16 predicctor variables
 
-data.std<-data.frame(apply(X = PredictVar[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
-#data.std<-data.frame(apply(X = PredictVar_R[,1:15], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+data.std<-data.frame(apply(X = PredictVar[,1:17], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
+#data.std<-data.frame(apply(X = PredictVar_R[,1:16], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (2*sd(x,na.rm=T))}))
 
 
 #convert facrtor to character
@@ -60,8 +62,8 @@ all.dataChar[] <- sapply(all.dataChar, function(x) if (is.factor(x)) as.characte
 
 data.std1<-cbind(data.std,all.data[,c("Richness","biomassarea1")],all.dataChar)
 
-colnames(data.std1)[17]<-"Richness_resp"
-colnames(data.std1)[18]<-"Biomass_resp"
+colnames(data.std1)[18]<-"Richness_resp"
+colnames(data.std1)[19]<-"Biomass_resp"
 
 #1. Create list with all possible combinations between predictors 
 vifPredCombinations  <-  list()
@@ -110,14 +112,15 @@ next
 }
 }
 
+
 ##configure models
-vifPredCombinations_biom<-vifPredCombinations_new
+vifPredCombinations_biom<-vifPredCombinations_new[1:18000]
 #vifPredCombinations_rich<-vifPredCombinations_new
-rm(vifPredCombinations_new)
+#rm(vifPredCombinations_new)
 
 modelText.biom<-lapply(vifPredCombinations_biom, prepareModelText,data.std1 )
 
-modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
+#modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
 
 #set reference level for categorical variable
 data.std1$Class<-relevel( as.factor(data.std1$Class), ref="Fished" )
@@ -129,7 +132,7 @@ detectCores()
 #modList.rich<-lapply(modelText.rich, evalTextModel)
 
 ##run using multicore
-system.time({modList.biom<-mclapply(modelText.biom,mc.cores=24,evalTextModel)})
+system.time({modList.biom<-mclapply(modelText.biom,mc.cores=20,evalTextModel)})
 
 #system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
