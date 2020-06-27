@@ -115,11 +115,12 @@ next
 
 ##configure models
 vifPredCombinations_biom<-vifPredCombinations_new[1:18000]
+vifPredCombinations_biom_set2<-vifPredCombinations_new[18001:35476]
 #vifPredCombinations_rich<-vifPredCombinations_new
 #rm(vifPredCombinations_new)
 
 modelText.biom<-lapply(vifPredCombinations_biom, prepareModelText,data.std1 )
-
+modelText.biom_set2<-lapply(vifPredCombinations_biom_set2, prepareModelText,data.std1 )
 #modelText.rich<-lapply(vifPredCombinations_rich, prepareModelText,data.std1 )
 
 #set reference level for categorical variable
@@ -132,19 +133,22 @@ detectCores()
 #modList.rich<-lapply(modelText.rich, evalTextModel)
 
 ##run using multicore
-system.time({modList.biom<-mclapply(modelText.biom,mc.cores=20,evalTextModel)})
+system.time({modList.biom_set2<-mclapply(modelText.biom_set2,mc.cores=24,evalTextModel)})
+
+#merge lists of models
+modList.biom.full<-append(modList.biom,modList.biom_set2)
 
 #system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
-findNonConverge<-lapply(modList.biom, AIC)
+findNonConverge<-lapply(modList.biom.full, AIC)
 nonconv.index<-which(is.na(findNonConverge))
-modList.biom<- modList.biom[-nonconv.index]
+modList.biom.full<- modList.biom.full[-nonconv.index]
 #modList2<- modList1[-1]
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-modelSel.biom<-model.sel(modList.biom, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel.biom, 'modSelSel.biomass_june_24.csv')
+modelSel.biom<-model.sel(modList.biom.full, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+write.csv(modelSel.biom, 'modSelSel.biomass_june_27.csv')
 
 
 #top.model<-get.models(modelSel, subset=delta<2)
@@ -166,7 +170,7 @@ df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 myPath<-"~/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/_prelim.figures/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:14,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:19,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -181,16 +185,17 @@ scale_color_identity()
 # geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="pink", # CIs
 #              width=.2,lwd=1) 
 
-ggsave("TopModelAvgCoef_biomass_june24.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef_biomass_june24.pdf")
+ggsave("TopModelAvgCoef_biomass_june27.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_biomass_june27.pdf")
 
 write.csv(df1, 'model.averaged.coefficients.csv')
 
 #save worksopace to Luisa's drive
-save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
-
-
-load('~/Documents/Mygitprojects/localfiles/modelSelection_biomass.RData')
+#save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
+save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
+#save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
+#load('/Volumes/LuisaDrive/ModelSel/variableCombinationForModels.RData')
+load(("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData"))
 
 
 
