@@ -146,10 +146,18 @@ modList.biom.full<-append(modList.biom,modList.biom_set2)
 
 #system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
-findNonConverge<-lapply(modList.rich, AIC)
+#removes the non converged models
+findNonConverge<-lapply(modList.biom.full, AIC)#change the list name
 nonconv.index<-which(is.na(findNonConverge))
-modList.rich<- modList.rich[-nonconv.index]
+modList.biom.full<- modList.biom.full[-nonconv.index]#change the list name
 #modList2<- modList1[-1]
+
+modList.biom.full[[10]]#summary
+
+
+
+
+
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
