@@ -3,6 +3,7 @@
 ##procdure includes testing for VIF
 ##creating all possible combinations 
 ##fitting linear models of gamma family
+#trial
 
 rm(list=ls())
 library(usdm)
