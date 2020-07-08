@@ -1,5 +1,15 @@
-##Global Density
-glob <- global_metrics_Majambo_s_MacBook_Pro_Majambo_s_MacBook_Pro
+#Majambo
+#Plot Global Density from indegree,outdegree and local retention
+
+library(ggplot2)
+library(ggtern)
+library(tidyverse)
+library(patchwork)
+
+#________________________________________________________________________
+                              #Read Data
+#________________________________________________________________________
+glob <- read.csv('_data/nanscaledTriangle.csv')
 t.glob<-glob[c(6:170)]
 t2.glob<-as.data.frame(sapply(t.glob, rescale, to = c(0, 100)))
 
@@ -26,7 +36,7 @@ b <- ggtern(data = glob,
   guides(fill = guide_colorbar(order=1),color="none") + 
   labs(title = "Transient",
        x = "", xarrow = "Indegree", y = "", yarrow = "Outdegree",
-       z = "", zarrow = "Local retension", size = 14) +
+       z = "", zarrow = "Local retention", size = 14) +
   theme(plot.title = element_text(hjust = 0.5, vjust= -8, size = 15)) + theme(legend.position = "none")
 #labs(title= "Ternary Plot and Filled Contour",fill = "Value, V")
 
@@ -57,7 +67,7 @@ b1 <- ggtern(data = glob,
   guides(fill = guide_colorbar(order=1),color="none") + 
   labs(title = "Resident",
        x = "", xarrow = "Indegree", y = "", yarrow = "Outdegree",
-       z = "", zarrow = "Local retension", size = 14) +
+       z = "", zarrow = "Local retention", size = 14) +
   theme(plot.title = element_text(hjust = 0.5, vjust= -8, size = 15)) + theme(legend.position = "none")
 #labs(title= "Ternary Plot and Filled Contour",fill = "Value, V")
 
@@ -88,7 +98,7 @@ b2 <- ggtern(data = glob,
   guides(fill = guide_colorbar(order=1),color="none") + 
   labs(title = "Cryptobenthic",
        x = "", xarrow = "Indegree", y = "", yarrow = "Outdegree",
-       z = "", zarrow = "Local retension", size = 14) + 
+       z = "", zarrow = "Local retention", size = 14) + 
   theme(plot.title = element_text(hjust = 0.5, vjust= -8, size = 15)) + theme(legend.position = "none")
 #labs(title= "Ternary Plot and Filled Contour",fill = "Value, V")
 
@@ -118,7 +128,7 @@ b3 <- ggtern(data = glob,
   guides(fill = guide_colorbar(order=1),color="none") + 
   labs(title = "Parental",
        x = "", xarrow = "Indegree", y = "", yarrow = "Outdegree",
-       z = "", zarrow = "Local retension", size = 14,fill = "Value") +
+       z = "", zarrow = "Local retention", size = 14,fill = "Value") +
   theme(plot.title = element_text(hjust = 0.5, vjust= -8, size = 15))  
 #labs(title= "Ternary Plot and Filled Contour",fill = "Value, V")
 
