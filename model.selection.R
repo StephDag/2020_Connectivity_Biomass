@@ -150,21 +150,34 @@ system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 #load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
 #> load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
 
+
+
 #merge lists of models
 modList.biom.full<-append(modList.biom,modList.biom_set2)
 length(vifPredCombinations_new)
 
 #get index
 FE.index<-which(sapply(vifPredCombinations_new, FUN=function(X) "FE" %in% X))
+srich.index<-which(sapply(vifPredCombinations_rich, FUN=function(X) "FE" %in% X))
+  
+  
+
 
 #delete models with FE
 modList.biom.full<- modList.biom.full[-FE.index]
+modList.rich<- modList.rich[-srich.index]
 
 #removes the non converged models
 findNonConverge<-lapply(modList.biom.full, AIC)#change the list name
 nonconv.index<-which(is.na(findNonConverge))
 modList.biom.full<- modList.biom.full[-nonconv.index]#change the list name
 #modList2<- modList1[-1]
+#modList.rich
+findNonConverge<-lapply(modList.rich, AIC)#change the list name
+nonconv.index<-which(is.na(findNonConverge))
+modList.rich<- modList.rich[-nonconv.index]#change the list name
+
+
 
 #remove the 
 
@@ -175,24 +188,24 @@ modelSel.biom<-model.sel(modList.biom.full, rank.args = list(REML = FALSE),extra
 write.csv(modelSel.biom, 'modSelSel.biomass_july_23.csv')
 
 
-#modelSel.rich<-model.sel(modList.rich, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-#write.csv(modelSel.rich, 'modSelSel.rich_june_28.csv')
+modelSel.rich<-model.sel(modList.rich, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+write.csv(modelSel.rich, 'modSelSel.rich_july_24.csv')
 
 
 
 
-top.model<-get.models(modelSel.biom, subset=delta<2)
-#top.model.rich<-get.models(modelSel.rich, subset=delta<2)
+#top.model<-get.models(modelSel.biom, subset=delta<2)
+top.model.rich<-get.models(modelSel.rich, subset=delta<2)
 
 topModelAve.biom<-model.avg(top.model) 
 #topModelAve.r<-model.avg(top.model.rich) 
 
-mA<-summary(topModelAve.biom) #pulling out model averages
-#mA<-summary(topModelAve.r) #pulling out model averages
+#mA<-summary(topModelAve.biom) #pulling out model averages
+mA<-summary(topModelAve.r) #pulling out model averages
 df1<-as.data.frame(mA$coefmat.full) #selecting full model coefficient averages
 
-#CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
-CI <- as.data.frame(confint(topModelAve.biom, full=T)) # get confidence intervals for full model
+CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
+#CI <- as.data.frame(confint(topModelAve.biom, full=T)) # get confidence intervals for full model
 
 df1$CI.min <-CI$`2.5 %` #pulling out CIs and putting into same df as coefficient estimates
 df1$CI.max <-CI$`97.5 %`# order of coeffients same in both, so no mixups; but should check anyway
@@ -203,7 +216,7 @@ df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 myPath<-"~/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/_prelim.figures/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:14,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:15,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -218,10 +231,10 @@ scale_color_identity()
 # geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="pink", # CIs
 #              width=.2,lwd=1) 
 
-ggsave("TopModelAvgCoef_biomass_july23.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef_biomass_july23.pdf")
+ggsave("TopModelAvgCoef_richness_july23.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_richness_july23.pdf")
 
-write.csv(df1, 'model.averaged.coefficients_biomass_july23.csv')
+write.csv(df1, 'model.averaged.coefficients_richness_july23.csv')
 
 #save worksopace to Luisa's drive
 #save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
@@ -234,5 +247,5 @@ save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_richness.RData",compress
 ##
 load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
 load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
-
+load("/Volumes/LuisaDrive/ModelSel/modelSelection_richness.RData")
 
