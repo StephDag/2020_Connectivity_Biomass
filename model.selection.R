@@ -226,7 +226,7 @@ write.csv(df1, 'model.averaged.coefficients_biomass_july23.csv')
 #save worksopace to Luisa's drive
 #save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
 #save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
-
+save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomassModels_july23.RData")
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_richness.RData",compress="xz")
 #load('/Volumes/LuisaDrive/ModelSel/variableCombinationForModels.RData')
 
