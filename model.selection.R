@@ -139,13 +139,26 @@ system.time({modList.biom_set2<-mclapply(modelText.biom_set2,mc.cores=24,evalTex
 ##run using multicore
 system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
+#system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 
 
+######
+#modelruns processing
+#July23
+####
+
+#load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
+#> load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
 
 #merge lists of models
 modList.biom.full<-append(modList.biom,modList.biom_set2)
+length(vifPredCombinations_new)
 
-#system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
+#get index
+FE.index<-which(sapply(vifPredCombinations_new, FUN=function(X) "FE" %in% X))
+
+#delete models with FE
+modList.biom.full<- modList.biom.full[-FE.index]
 
 #removes the non converged models
 findNonConverge<-lapply(modList.biom.full, AIC)#change the list name
@@ -153,36 +166,34 @@ nonconv.index<-which(is.na(findNonConverge))
 modList.biom.full<- modList.biom.full[-nonconv.index]#change the list name
 #modList2<- modList1[-1]
 
-modList.biom.full[[10]]#summary
-
-
-
-
-
+#remove the 
 
 
 #modelSel<-model.sel(modList1, rank.args = list(REML = FALSE), extra =c(AIC, BIC))
 #modelSel1<-model.sel(modList2, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
 modelSel.biom<-model.sel(modList.biom.full, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel.biom, 'modSelSel.biomass_june_27.csv')
+write.csv(modelSel.biom, 'modSelSel.biomass_july_23.csv')
 
 
-modelSel.rich<-model.sel(modList.rich, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
-write.csv(modelSel.rich, 'modSelSel.rich_june_28.csv')
+#modelSel.rich<-model.sel(modList.rich, rank.args = list(REML = FALSE),extra = list(AIC, BIC,R2 = function(x) r.squaredGLMM(x, fmnull)["delta", ]))
+#write.csv(modelSel.rich, 'modSelSel.rich_june_28.csv')
 
 
 
 
-#top.model<-get.models(modelSel, subset=delta<2)
-top.model.rich<-get.models(modelSel.rich, subset=delta<2)
+top.model<-get.models(modelSel.biom, subset=delta<2)
+#top.model.rich<-get.models(modelSel.rich, subset=delta<2)
 
-topModelAve.r<-model.avg(top.model.rich) 
+topModelAve.biom<-model.avg(top.model) 
+#topModelAve.r<-model.avg(top.model.rich) 
 
-
-mA<-summary(topModelAve.r) #pulling out model averages
+mA<-summary(topModelAve.biom) #pulling out model averages
+#mA<-summary(topModelAve.r) #pulling out model averages
 df1<-as.data.frame(mA$coefmat.full) #selecting full model coefficient averages
 
-CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
+#CI <- as.data.frame(confint(topModelAve.r, full=T)) # get confidence intervals for full model
+CI <- as.data.frame(confint(topModelAve.biom, full=T)) # get confidence intervals for full model
+
 df1$CI.min <-CI$`2.5 %` #pulling out CIs and putting into same df as coefficient estimates
 df1$CI.max <-CI$`97.5 %`# order of coeffients same in both, so no mixups; but should check anyway
 setDT(df1, keep.rownames = "coefficient") #put rownames into column
@@ -192,7 +203,7 @@ df1$coefficient<-gsub("cond\\(|)","",x)#remove brackets around predictor names
 myPath<-"~/Documents/Connectvity_Biomass/2020_Connectivity_Biomass/_prelim.figures/"
 #pdf(file = myPath, onefile = F, width = 4, height = 8.5)
 
-df1[2:15,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
+df1[2:14,] %>% mutate(Color = ifelse( Estimate> 0, "blue", "red")) %>%
 ggplot(aes(x=coefficient, y=Estimate,color = Color))+ #again, excluding intercept because estimates so much larger
 geom_hline(yintercept=0, color = "black",linetype="dashed", lwd=1.5)+ #add dashed line at zero
 geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="black", #CI
@@ -207,19 +218,21 @@ scale_color_identity()
 # geom_errorbar(aes(ymin=CI.min, ymax=CI.max), colour="pink", # CIs
 #              width=.2,lwd=1) 
 
-ggsave("TopModelAvgCoef_richness_june28.pdf",path = myPath,width = 8, height = 8)
-unlink("TopModelAvgCoef_richness_june28.pdf")
+ggsave("TopModelAvgCoef_biomass_july23.pdf",path = myPath,width = 8, height = 8)
+unlink("TopModelAvgCoef_biomass_july23.pdf")
 
-write.csv(df1, 'model.averaged.coefficients_richness.csv')
+write.csv(df1, 'model.averaged.coefficients_biomass_july23.csv')
 
 #save worksopace to Luisa's drive
 #save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
-save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
-save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass.RData")
+#save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
+
 save.image("/Volumes/LuisaDrive/ModelSel/modelSelection_richness.RData",compress="xz")
 #load('/Volumes/LuisaDrive/ModelSel/variableCombinationForModels.RData')
 
-load(("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData"))
 
+##
+load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
+load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
 
 
