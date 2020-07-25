@@ -147,9 +147,8 @@ system.time({modList.rich<-mclapply(modelText.rich,mc.cores=24,evalTextModel)})
 #July23
 ####
 
-#load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
-#> load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
-
+load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run1.RData")
+load("/Volumes/LuisaDrive/ModelSel/modelSelection_biomass_run2.RData")
 
 
 #merge lists of models
@@ -158,19 +157,19 @@ length(vifPredCombinations_new)
 
 #get index
 FE.index<-which(sapply(vifPredCombinations_new, FUN=function(X) "FE" %in% X))
-srich.index<-which(sapply(vifPredCombinations_rich, FUN=function(X) "FE" %in% X))
+#srich.index<-which(sapply(vifPredCombinations_rich, FUN=function(X) "FE" %in% X))
   
-  
-
 
 #delete models with FE
 modList.biom.full<- modList.biom.full[-FE.index]
-modList.rich<- modList.rich[-srich.index]
+#modList.rich<- modList.rich[-srich.index] ##
 
 #removes the non converged models
 findNonConverge<-lapply(modList.biom.full, AIC)#change the list name
 nonconv.index<-which(is.na(findNonConverge))
 modList.biom.full<- modList.biom.full[-nonconv.index]#change the list name
+
+
 #modList2<- modList1[-1]
 #modList.rich
 findNonConverge<-lapply(modList.rich, AIC)#change the list name
