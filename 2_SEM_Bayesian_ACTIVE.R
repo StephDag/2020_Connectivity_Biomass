@@ -261,16 +261,18 @@ all_fit_brms.tot.TRANSIENT.intr %>% rm()  # Full - connectivity through both S a
 all_fit_brms.tot.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-
+saveRDS(all_fit_brms.tot.TRANSIENT.intr,"all_fit_brms.tot.TRANSIENT.intr.Rds")
 all_fit_brms.tot.TRANSIENT.intr.extr %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr,"all_fit_brms.tot.TRANSIENT.intr.extr.Rds")
 
 all_fit_brms.tot.TRANSIENT.intr.extr.simp %>% rm()  # Simple - connectivity through both S and B
 all_fit_brms.tot.TRANSIENT.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr.simp,"all_fit_brms.tot.TRANSIENT.intr.extr.simp.Rds")
 
 
 #TRANSIENT species mediated
@@ -931,8 +933,8 @@ DesiredOrder <- c("Intercept",
                   "No-Take",
                   "Restricted gears",
                   "Tot.Gravity x No-Take","Tot.Gravity x Restricted gears",
-                  "Netflow","Inflow","Self Recruit.","Betweeness Centr.",
-                  "Gravity Neighb.","Inflow MPA","Inflow Neighb.","Corridor Indegree",                      
+                  "Netflow","Inflow","Self Recruit.",
+                  "Gravity Neighb.","Inflow Neighb.",                      
                   "Tot.Gravity x Netflow",
                   "No-Take x Netflow","Restricted gears x Netflow",
                   "Tot.Gravity x No-Take x Netflow","Tot.Gravity x Restricted gears x Netflow")
@@ -972,6 +974,7 @@ Transient.SEM <- ggplot(two_models %>% filter(PARAM != "Intercept"), aes(colour 
 Transient.SEM  # The trick to these is position_dodge()
 rm(two_models)
 # RESIDENT
+rm(a)
 a <- mcmc_intervals(all_fit_brms.tot.RESID.intr.extr.simp)
 rich.var <- as.data.frame(a$data)[grep("b_Richness",as.data.frame(a$data)[,"parameter"]),"parameter"]
 biom.var <- as.data.frame(a$data)[grep("b_logbiomassarea",as.data.frame(a$data)[,"parameter"]),"parameter"]
@@ -1018,6 +1021,7 @@ Resident.SEM <- ggplot(two_models %>% filter(PARAM != "Intercept"), aes(colour =
 Resident.SEM  # The trick to these is position_dodge()
 rm(two_models)
 # PARENTAL
+rm(a)
 a <- mcmc_intervals(all_fit_brms.tot.PARENTAL.intr.extr.simp)
 rich.var <- as.data.frame(a$data)[grep("b_Richness",as.data.frame(a$data)[,"parameter"]),"parameter"]
 biom.var <- as.data.frame(a$data)[grep("b_logbiomassarea",as.data.frame(a$data)[,"parameter"]),"parameter"]
@@ -1042,7 +1046,6 @@ m2_df_parental <- cbind(PARAM,m2_df_parental,CAT)
 m2_df_parental$PARAM <- factor(m2_df_parental$PARAM, levels = rev(DesiredOrder))
 m2_df_parental$CAT <- factor(m2_df_parental$CAT , levels = c("Intercept","Richness","Human/Env.","Intrinsic Connect.","Extrinsic Connect."),ordered = TRUE)
 
-
 two_models <- rbind(m1_df_parental, m2_df_parental)
 two_models$FE <- as.factor(two_models$FE)
 two_models$model <- as.factor(two_models$model)
@@ -1065,6 +1068,7 @@ Parental.SEM  # The trick to these is position_dodge()
 
 rm(two_models)
 # CRYPTIC
+rm(a)
 a <- mcmc_intervals(all_fit_brms.tot.CRYPTIC.intr.extr.simp)
 rich.var <- as.data.frame(a$data)[grep("b_Richness",as.data.frame(a$data)[,"parameter"]),"parameter"]
 biom.var <- as.data.frame(a$data)[grep("b_logbiomassarea",as.data.frame(a$data)[,"parameter"]),"parameter"]
@@ -1112,7 +1116,7 @@ Cryptic.SEM  # The trick to these is position_dodge()
 
 # total
 
-SEM_inflow_tot <- ggarrange(Richness_inflow_TRANSIENT_simp,Richness_inflow_RESIDENT_simp,
+SEM_inflow_simp <- ggarrange(Richness_inflow_TRANSIENT_simp,Richness_inflow_RESIDENT_simp,
                             Richness_inflow_PARENTAL_simp,Richness_inflow_CRYPTIC_simp, 
                             Biomass_inflow_TRANSIENT_simp,
                             Biomass_inflow_PARENTAL_simp,
@@ -1120,42 +1124,7 @@ SEM_inflow_tot <- ggarrange(Richness_inflow_TRANSIENT_simp,Richness_inflow_RESID
                             Biomass_inflow_RESIDENT_simp,
                             ncol=4,nrow=2,labels = c("A_Richness_Transient","B_Richness_Resident","C_Richness_Parental","D_Richness_Cryptic",
                                                      "E_Biomass_Transient","F_Biomass_Resident","G_Biomass_Parental","H_Biomass_Cryptic"),align="hv")
-ggsave(here("_prelim.figures","SEM_bayes_inflow_coef_simp_FE.pdf"),SEM_inflow_tot,width=30,height=15)
-
-SEM_inflow_tot_weight <- round(rbind(TRANSIENT.weight[c(1,2,5,3,4,6)],RESID.weight[c(1,2,5,3,4,6)],
-                                     PARENTAL.weight[c(1,2,5,3,4,6)],CRYPTIC.weight[c(1,2,5,3,4,6)]),2)
-colnames(SEM_inflow_tot_weight) <- c("Model1_Full_intr","Model1_Full_intr_extr","Model1_Full_intr_extr_simp","Model2_Smed_intr","Model2_Smed_intr_extr","Model3_noCon")
-rownames(SEM_inflow_tot_weight) <- c("TRANSIENT","RESIDENT","PARENTAL","CRYPTIC")
-
-require(kableExtra)
-SEM_inflow_tot_weight.table <- SEM_inflow_tot_weight  %>%
-  kable(align="c") %>%
-  kable_styling() %>%
-  save_kable("_prelim.figures/SEM_bayes_inflow_weight_FE.png")
-
-SEM_inflow_tot_R2 <- round(rbind(TRANSIENT.R2[c(1,2,3,4,9,10,5,6,7,8,11,12),1],
-                                 RESID.R2[c(1,2,3,4,9,10,5,6,7,8,11,12),1],
-                                 PARENTAL.R2[c(1,2,3,4,9,10,5,6,7,8,11,12),1],
-                                 CRYPTIC.R2[c(1,2,3,4,9,10,5,6,7,8,11,12),1]),2)
-colnames(SEM_inflow_tot_R2) <- c("Model1_Full_S_intr","Model1_Full_B_intr",
-                                 "Model1_Full_S_intr_extr","Model1_Full_B_intr_extr",
-                                 "Model1_Full_S_intr_extr_simp","Model1_Full_B_intr_extr_simp",
-                                 "Model2_Smed_S_intr","Model2_Smed_B_intr",
-                                 "Model2_Smed_S_intr_extr","Model2_Smed_B_intr_extr",
-                                 "Model3_noCon_S","Model3_noCon_B")
-rownames(SEM_inflow_tot_R2) <- c("TRANSIENT",
-                                 "RESIDENT",
-                                 "PARENTAL",
-                                 "CRYPTIC")
-SEM_inflow_tot_R2.table <- SEM_inflow_tot_R2  %>%
-  kable(align="c") %>%
-  kable_styling() %>%
-  save_kable("_prelim.figures/SEM_bayes_inflow_R2_FE.png")
-
-#####
-SEM_coef_tot <- ggarrange(Transient.SEM,Resident.SEM,Parental.SEM,Cryptic.SEM,
-                          ncol=2,nrow=2,labels = c("A","B","C","D"),align="hv",common.legend = T,legend="bottom")
-ggsave(here("_prelim.figures","SEM_bayes_coef_total_FE.pdf"),SEM_coef_tot,width=15,height=15)
+ggsave(here("_prelim.figures","SEM_bayes_inflow_coef_simp_FE.pdf"),SEM_inflow_simp,width=30,height=15)
 
 #### two plots 1) Richness 2) Biomass
 
@@ -1204,13 +1173,13 @@ Biomass.FE <- ggplot(four_FE_Biomass %>% filter(PARAM != "Intercept"), aes(colou
   ggtitle("Biomass") 
 Biomass.FE  # The trick to these is position_dodge()
 
-SEM_coef_tot_rich_biom <- ggarrange(Richness.FE,Biomass.FE,
+SEM_coef_simp_rich_biom <- ggarrange(Richness.FE,Biomass.FE,
                                     ncol=2,nrow=1,labels = c("A","B"),align="hv",common.legend = T,legend="bottom")
-ggsave(here("_prelim.figures","SEM_bayes_coef_total_FE_rich_biom.pdf"),SEM_coef_tot_rich_biom,width=15,height=15)
+ggsave(here("_prelim.figures","SEM_bayes_coef_simp_FE_rich_biom.pdf"),SEM_coef_simp_rich_biom,width=15,height=15)
 
 # save parameters for each model
-write.csv(four_FE_Biomass,here("_prelim.figures","SEM_bayes_coef_total_FE_Biomass.csv"))
-write.csv(four_FE_Richness,here("_prelim.figures","SEM_bayes_coef_total_FE_Richness.csv"))
+write.csv(four_FE_Biomass,here("_prelim.figures","SEM_bayes_coef_simp_FE_Biomass.csv"))
+write.csv(four_FE_Richness,here("_prelim.figures","SEM_bayes_coef_simp_FE_Richness.csv"))
 
 # END
 
