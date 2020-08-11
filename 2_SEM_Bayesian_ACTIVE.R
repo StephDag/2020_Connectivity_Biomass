@@ -280,15 +280,20 @@ all_fit_brms.nocon.S.TRANSIENT.intr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                      prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.TRANSIENT.intr,"all_fit_brms.nocon.S.TRANSIENT.intr.Rds")
+
 all_fit_brms.nocon.S.TRANSIENT.intr.extr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.TRANSIENT.intr.extr,"all_fit_brms.nocon.S.TRANSIENT.intr.extr.Rds")
+
 #
 all_fit_brms.nocon.TRANSIENT %>% rm() # no connectivity for S and B, only environment
 all_fit_brms.nocon.TRANSIENT <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                   iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.TRANSIENT,"all_fit_brms.nocon.TRANSIENT.Rds")
 
 
 TRANSIENT.weight <- model_weights(all_fit_brms.tot.TRANSIENT.intr,
@@ -1180,6 +1185,7 @@ ggsave(here("_prelim.figures","SEM_bayes_coef_simp_FE_rich_biom.pdf"),SEM_coef_s
 # save parameters for each model
 write.csv(four_FE_Biomass,here("_prelim.figures","SEM_bayes_coef_simp_FE_Biomass.csv"))
 write.csv(four_FE_Richness,here("_prelim.figures","SEM_bayes_coef_simp_FE_Richness.csv"))
+
 
 # END
 
