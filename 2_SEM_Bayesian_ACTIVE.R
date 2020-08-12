@@ -346,16 +346,20 @@ all_fit_brms.tot.RESID.intr %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.RESID.intr,"all_fit_brms.tot.RESID.intr.Rds")
+
 
 all_fit_brms.tot.RESID.intr.extr %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.RESID.intr.extr,"all_fit_brms.tot.RESID.intr.extr.Rds")
 
 all_fit_brms.tot.RESID.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.RESID.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                                 iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                                 prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.RESID.intr.extr.simp,"all_fit_brms.tot.RESID.intr.extr.simp.Rds")
 
 
 #RESID species mediated
@@ -363,15 +367,20 @@ all_fit_brms.nocon.S.RESID.intr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.RESID.intr,"all_fit_brms.nocon.S.RESID.intr.Rds")
+
 all_fit_brms.nocon.S.RESID.intr.extr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.RESID.intr.extr,"all_fit_brms.nocon.S.RESID.intr.extr.Rds")
+
 #
 all_fit_brms.nocon.RESID %>% rm() # no connectivity for S and B, only environment
 all_fit_brms.nocon.RESID <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
                                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.RESID,"all_fit_brms.nocon.RESID.Rds")
 
 
 RESID.weight <- model_weights(all_fit_brms.tot.RESID.intr,
@@ -412,16 +421,19 @@ all_fit_brms.tot.PARENTAL.intr %>% rm()  # Full - connectivity through both S an
 all_fit_brms.tot.PARENTAL.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.PARENTAL.intr,"all_fit_brms.tot.PARENTAL.intr.Rds")
 
 all_fit_brms.tot.PARENTAL.intr.extr %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.PARENTAL.intr.extr,"all_fit_brms.tot.PARENTAL.intr.extr.Rds")
 
 all_fit_brms.tot.PARENTAL.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.PARENTAL.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                                 iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                                 prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.PARENTAL.intr.extr.simp,"all_fit_brms.tot.PARENTAL.intr.extr.simp.Rds")
 
 
 #PARENTAL species mediated
@@ -429,15 +441,20 @@ all_fit_brms.nocon.S.PARENTAL.intr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.PARENTAL.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.PARENTAL.intr,"all_fit_brms.nocon.S.PARENTAL.intr.Rds")
+
 all_fit_brms.nocon.S.PARENTAL.intr.extr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.S.PARENTAL.intr.extr,"all_fit_brms.nocon.S.PARENTAL.intr.extr.Rds")
+
 #
 all_fit_brms.nocon.PARENTAL %>% rm() # no connectivity for S and B, only environment
 all_fit_brms.nocon.PARENTAL <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
                                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.PARENTAL,"all_fit_brms.nocon.PARENTAL.Rds")
 
 
 PARENTAL.weight <- model_weights(all_fit_brms.tot.PARENTAL.intr,
