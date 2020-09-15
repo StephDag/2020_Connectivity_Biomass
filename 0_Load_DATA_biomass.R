@@ -1,5 +1,5 @@
 ### script to load data for the connectivity project when necessary
-rm(list=ls())
+
 
 # brms
 
@@ -19,8 +19,7 @@ rm(list=ls())
 require(dplyr)
 require(here)
 require(forcats)
-require(brms)
-require(rstan)
+
 
 # load data
 rm(all.data)

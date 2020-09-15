@@ -3,7 +3,6 @@
 # date: April 2020
 # outputs: Power of the coefficients
 
-rm(list=ls())
 
 # packages
 library(dotwhisker)
@@ -13,6 +12,7 @@ library("bayesplot")
 library("ggplot2")
 library("rstanarm")   
 require(ggpubr)
+library(brms)
 
 # load models
 rm(species_mod_inflow.intr) # ENV + CON
@@ -60,30 +60,30 @@ S_mod_nocon <- bf(Richness ~ temp + log_grav_total*Class  + (1+ log_grav_total|r
 
 # full data for each functional group
 all_fit_brms.tot.TRANSIENT.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=TRANSIENT.std,cores=24,chains = 4,
-                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+all_fit_brms.tot.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=TRANSIENT.std,cores=24,chains = 2,
+                                           iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 
 all_fit_brms.tot.RESID.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=RESID.std,cores=24,chains = 4,
-                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+all_fit_brms.tot.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=RESID.std,cores=24,chains = 2,
+                                       iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 all_fit_brms.tot.PARENTAL.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=PARENTAL.std,cores=24,chains = 4,
-                                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+all_fit_brms.tot.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=PARENTAL.std,cores=24,chains = 2,
+                                          iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 all_fit_brms.tot.CRYPTIC.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=CRYPTIC.std,cores=24,chains = 4,
-                                         iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+all_fit_brms.tot.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=CRYPTIC.std,cores=24,chains = 2,
+                                         iter = 2000, warmup = 200,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 # newdata 
-post.pred.TRANSIENT <- posterior_predict(all_fit_brms.tot.TRANSIENT.intr.extr) # 8000*256*2 (fish richness and biomass)
-post.pred.RESID <- posterior_predict(all_fit_brms.tot.RESID.intr.extr) # 8000*256*2 (fish richness and biomass)
-post.pred.PARENTAL <- posterior_predict(all_fit_brms.tot.PARENTAL.intr.extr) # 8000*256*2 (fish richness and biomass)
-post.pred.CRYPTIC <- posterior_predict(all_fit_brms.tot.CRYPTIC.intr.extr) # 8000*256*2 (fish richness and biomass)
+post.pred.TRANSIENT <- posterior_predict(all_fit_brms.tot.TRANSIENT.intr.extr) # 1800*256*2 (fish richness and biomass)
+post.pred.RESID <- posterior_predict(all_fit_brms.tot.RESID.intr.extr) # 8000*233*2 (fish richness and biomass)
+post.pred.PARENTAL <- posterior_predict(all_fit_brms.tot.PARENTAL.intr.extr) # 8000*230*2 (fish richness and biomass)
+post.pred.CRYPTIC <- posterior_predict(all_fit_brms.tot.CRYPTIC.intr.extr) # 8000*227*2 (fish richness and biomass)
 
 # Number of posterior to draw from each matrix = 20% = 1600
-post.draws <- sample(1:8000,1600) # sample randomly 1600 draws from the 8000 from each model
+post.draws <- sample(1:1600,200) # sample randomly 1600 draws from the 8000 from each model
 
 # post.pred: 1st list = Richness
 Rich.TRANSIENT <- post.pred.TRANSIENT[,,1] 
@@ -96,13 +96,14 @@ Rich.CRYPTIC <- post.pred.CRYPTIC[,,1]
 Biom.CRYPTIC <- post.pred.CRYPTIC[,,2]
 
 rm(newdata.TRANSIENT)
-newdata.TRANSIENT <- TRANSIENT.std[-which(is.na(TRANSIENT.std$Netflow)),] # rm NA
+newdata.TRANSIENT <- na.omit(TRANSIENT.std) # rm NA
 rm(newdata.RESID)
-newdata.RESID <- RESID.std[-which(is.na(RESID.std$Netflow)),] # rm NA
+newdata.RESID <- na.omit(RESID.std)  # rm NA
+
 rm(newdata.PARENTAL)
-newdata.PARENTAL <- PARENTAL.std[-which(is.na(PARENTAL.std$Netflow)),] # rm NA
+newdata.PARENTAL <- na.omit(PARENTAL.std)  # rm NA
 rm(newdata.CRYPTIC)
-newdata.CRYPTIC <- CRYPTIC.std[-which(is.na(CRYPTIC.std$Netflow)),] # rm NA
+newdata.CRYPTIC <- na.omit(CRYPTIC.std)  # rm NA
 
 # updates the model with each raw of post.pred and extract the coefficient values
   # create list to store the coefficient for each of the 30 model
