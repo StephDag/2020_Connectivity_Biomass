@@ -96,14 +96,13 @@ Rich.CRYPTIC <- post.pred.CRYPTIC[,,1]
 Biom.CRYPTIC <- post.pred.CRYPTIC[,,2]
 
 rm(newdata.TRANSIENT)
-newdata.TRANSIENT <- na.omit(TRANSIENT.std) # rm NA
+newdata.TRANSIENT <-all_fit_brms.tot.TRANSIENT.intr.extr$data # rm NA
 rm(newdata.RESID)
-newdata.RESID <- na.omit(RESID.std)  # rm NA
-
+newdata.RESID <- all_fit_brms.tot.RESID.intr.extr$data # rm NA
 rm(newdata.PARENTAL)
-newdata.PARENTAL <- na.omit(PARENTAL.std)  # rm NA
+newdata.PARENTAL <- all_fit_brms.tot.PARENTAL.intr.extr$data # rm NA
 rm(newdata.CRYPTIC)
-newdata.CRYPTIC <- na.omit(CRYPTIC.std)  # rm NA
+newdata.CRYPTIC <- all_fit_brms.tot.CRYPTIC.intr.extr$data # rm NA
 
 # updates the model with each raw of post.pred and extract the coefficient values
   # create list to store the coefficient for each of the 30 model
@@ -137,8 +136,8 @@ for (i in 1:length(post.draws)){
   rich.var.TRANSIENT <- as.data.frame(a.TRANSIENT$data)[grep("b_Richness",as.data.frame(a.TRANSIENT$data)[,"parameter"]),"parameter"]
   biom.var.TRANSIENT <- as.data.frame(a.TRANSIENT$data)[grep("b_logbiomassarea",as.data.frame(a.TRANSIENT$data)[,"parameter"]),"parameter"]
 
-  coef.rich.TRANSIENT[[Todraw]] <- mcmc_intervals_data(temp.fit.TRANSIENT, pars = as.character(rich.var.TRANSIENT))
-  coef.biom.TRANSIENT[[Todraw]]  <- mcmc_intervals_data(temp.fit.TRANSIENT,pars = as.character(biom.var.TRANSIENT))
+  coef.rich.TRANSIENT[[i]] <- mcmc_intervals_data(temp.fit.TRANSIENT, pars = as.character(rich.var.TRANSIENT))
+  coef.biom.TRANSIENT[[i]]  <- mcmc_intervals_data(temp.fit.TRANSIENT,pars = as.character(biom.var.TRANSIENT))
   
   # RESIDENT
   newdata.RESID$Richness <- Rich.RESID[Todraw,]
@@ -149,8 +148,8 @@ for (i in 1:length(post.draws)){
   rich.var.RESID <- as.data.frame(a.RESID$data)[grep("b_Richness",as.data.frame(a.RESID$data)[,"parameter"]),"parameter"]
   biom.var.RESID <- as.data.frame(a.RESID$data)[grep("b_logbiomassarea",as.data.frame(a.RESID$data)[,"parameter"]),"parameter"]
   
-  coef.rich.RESID[[Todraw]] <- mcmc_intervals_data(temp.fit.RESID, pars = as.character(rich.var.RESID))
-  coef.biom.RESID[[Todraw]]  <- mcmc_intervals_data(temp.fit.RESID,pars = as.character(biom.var.RESID))
+  coef.rich.RESID[i] <- mcmc_intervals_data(temp.fit.RESID, pars = as.character(rich.var.RESID))
+  coef.biom.RESID[[i]]  <- mcmc_intervals_data(temp.fit.RESID,pars = as.character(biom.var.RESID))
   
   # PARENTAL
   newdata.PARENTAL$Richness <- Rich.PARENTAL[Todraw,]
@@ -161,8 +160,8 @@ for (i in 1:length(post.draws)){
   rich.var.PARENTAL <- as.data.frame(a.PARENTAL$data)[grep("b_Richness",as.data.frame(a.PARENTAL$data)[,"parameter"]),"parameter"]
   biom.var.PARENTAL <- as.data.frame(a.PARENTAL$data)[grep("b_logbiomassarea",as.data.frame(a.PARENTAL$data)[,"parameter"]),"parameter"]
   
-  coef.rich.PARENTAL[[Todraw]] <- mcmc_intervals_data(temp.fit.PARENTAL, pars = as.character(rich.var.PARENTAL))
-  coef.biom.PARENTAL[[Todraw]]  <- mcmc_intervals_data(temp.fit.PARENTAL,pars = as.character(biom.var.PARENTAL))
+  coef.rich.PARENTAL[[i]] <- mcmc_intervals_data(temp.fit.PARENTAL, pars = as.character(rich.var.PARENTAL))
+  coef.biom.PARENTAL[[i]]  <- mcmc_intervals_data(temp.fit.PARENTAL,pars = as.character(biom.var.PARENTAL))
   
   # CRYPTIC
   newdata.CRYPTIC$Richness <- Rich.CRYPTIC[Todraw,]
@@ -173,8 +172,8 @@ for (i in 1:length(post.draws)){
   rich.var.CRYPTIC <- as.data.frame(a.CRYPTIC$data)[grep("b_Richness",as.data.frame(a.CRYPTIC$data)[,"parameter"]),"parameter"]
   biom.var.CRYPTIC <- as.data.frame(a.CRYPTIC$data)[grep("b_logbiomassarea",as.data.frame(a.CRYPTIC$data)[,"parameter"]),"parameter"]
   
-  coef.rich.CRYPTIC[[Todraw]] <- mcmc_intervals_data(temp.fit.CRYPTIC, pars = as.character(rich.var.CRYPTIC))
-  coef.biom.CRYPTIC[[Todraw]]  <- mcmc_intervals_data(temp.fit.CRYPTIC,pars = as.character(biom.var.CRYPTIC))
+  coef.rich.CRYPTIC[[i]] <- mcmc_intervals_data(temp.fit.CRYPTIC, pars = as.character(rich.var.CRYPTIC))
+  coef.biom.CRYPTIC[[i]]  <- mcmc_intervals_data(temp.fit.CRYPTIC,pars = as.character(biom.var.CRYPTIC))
   
   # clean temporary object at the end of the loop
   rm(temp.fit.TRANSIENT); rm(temp.fit.RESID);rm(temp.fit.PARENTAL);rm(temp.fit.CRYPTIC)
@@ -184,20 +183,31 @@ for (i in 1:length(post.draws)){
 
 }
 
+
+coef.rich.TRANSIENT <- coef.rich.TRANSIENT[-which(sapply(coef.rich.TRANSIENT, is.null))]
+coef.rich.RESID <- coef.rich.RESID[-which(sapply(coef.rich.RESID, is.null))]
+coef.rich.PARENTAL <- coef.rich.PARENTAL[-which(sapply(coef.rich.PARENTAL, is.null))]
+coef.rich.CRYPTIC <- coef.rich.CRYPTIC[-which(sapply(coef.rich.CRYPTIC, is.null))]
+
+coef.biom.TRANSIENT <- coef.biom.TRANSIENT[-which(sapply(coef.biom.TRANSIENT, is.null))]
+coef.biom.RESID <- coef.biom.RESID[-which(sapply(coef.biom.RESID, is.null))]
+coef.biom.PARENTAL <- coef.biom.PARENTAL[-which(sapply(coef.biom.PARENTAL, is.null))]
+coef.biom.CRYPTIC <- coef.biom.CRYPTIC[-which(sapply(coef.biom.CRYPTIC, is.null))]
+
 rm(temp.rich.TRANSIENT); rm(temp.biom.TRANSIENT)
 temp.rich.TRANSIENT <-  coef.rich.TRANSIENT[[1]]$parameter
 temp.biom.TRANSIENT <-  coef.biom.TRANSIENT[[1]]$parameter
 rm(temp.rich.RESID); rm(temp.biom.RESID)
 temp.rich.RESID <-  coef.rich.RESID[[1]]$parameter
 temp.biom.RESID <-  coef.biom.RESID[[1]]$parameter
-rm(temp.rich.PARENTAL); rm(temp.biom.TRANSIENT)
+rm(temp.rich.PARENTAL); rm(temp.biom.PARENTAL)
 temp.rich.PARENTAL <-  coef.rich.PARENTAL[[1]]$parameter
 temp.biom.PARENTAL <-  coef.biom.PARENTAL[[1]]$parameter
 rm(temp.rich.CRYPTIC); rm(temp.biom.CRYPTIC)
 temp.rich.CRYPTIC <-  coef.rich.CRYPTIC[[1]]$parameter
 temp.biom.CRYPTIC <-  coef.biom.CRYPTIC[[1]]$parameter
 
-for (j in 1:length(post.draws)){
+for (j in 1:length(coef.rich.RESID)){
   temp.rich.TRANSIENT <- cbind(temp.rich.TRANSIENT,as.vector(as.data.frame(coef.rich.TRANSIENT[[j]][,"m"])))
   temp.biom.TRANSIENT <- cbind(temp.biom.TRANSIENT,as.vector(as.data.frame(coef.biom.TRANSIENT[[j]][,"m"])))
   temp.rich.PARENTAL <- cbind(temp.rich.PARENTAL,as.vector(as.data.frame(coef.rich.PARENTAL[[j]][,"m"])))
@@ -223,13 +233,13 @@ for (j in 1:length(post.draws)){
  # RESIDENT
  # richness
  rm(df.rich.RESIDENT)
- df.rich.RESIDENT <- temp.rich.RESIDENT 
- rownames(df.rich.RESIDENT) <- temp.rich.RESIDENT[,1]; df.rich.RESIDENT$temp.rich <- NULL
+ df.rich.RESIDENT <- temp.rich.RESID
+ rownames(df.rich.RESIDENT) <- temp.rich.RESID[,1]; df.rich.RESIDENT$temp.rich <- NULL
  saveRDS(df.rich.RESIDENT,"Richness.power.pred.RESIDENT")
  # biomass
  rm(df.biom.RESIDENT)
- df.biom.RESIDENT <- temp.biom.RESIDENT 
- rownames(df.biom.RESIDENT) <- temp.biom.RESIDENT[,1]; df.biom.RESIDENT$temp.biom <- NULL
+ df.biom.RESIDENT <- temp.biom.RESID
+ rownames(df.biom.RESIDENT) <- temp.biom.RESID[,1]; df.biom.RESIDENT$temp.biom <- NULL
  saveRDS(df.biom.RESIDENT,"Biomass.power.pred.RESIDENT")
  
  # PARENTAL
