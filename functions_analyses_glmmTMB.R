@@ -56,7 +56,9 @@ prepareModelText  <-  function(Predictors, data) {
       fixStep   <-  paste0(Predictors[sapply(dat, class) == 'character'], collapse='+')
     }
   }
-  #paste0('glmmTMB(vci ~', fixStep,'+ (1|layer) + ',ranStep1,', family=beta_family(link = "logit")',',data=data.std)')
+
+
+#paste0('glmmTMB(vci ~', fixStep,'+ (1|layer) + ',ranStep1,', family=beta_family(link = "logit")',',data=data.std)')
   paste0('glmmTMB(Richness_resp ~', fixStep,'+ (1|ModelMode/Larval_behaviour/FE) + (1|region)',',family=Gamma("log")',',data=data.std1)')
      #+ exp(pos + 0|group)
   #paste0('glmmTMB(vci ~', fixStep,'+(1|layer), family=beta_family(link = "logit")',',data=train)')
