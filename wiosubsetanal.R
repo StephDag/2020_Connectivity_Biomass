@@ -12,3 +12,9 @@ print(fc_list)
 #wiompa<-readOGR(dsn=wiompagdb, "WIO_MPAs_Combined",require_geomType = 'wkbPolygon')
 require(sf)
 wiompa <- sf::st_read(wiompagdb, layer = "WIO_MPAs_Combined")
+str(wiompa)
+nc_sp <- sf:::as_Spatial(nc$geom)
+head(wiompa)
+levels(wiompa$Designation)
+
+
