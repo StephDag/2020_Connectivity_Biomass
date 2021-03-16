@@ -243,7 +243,7 @@ biom_mod_inflow.intr <- bf(log_biomassarea ~ Richness + temp + log_grav_total*Cl
                              (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree+ Netflow |region))
 
 rm(biom_mod_inflow.intr.extr) # ENV + CON
-biom_mod_inflow.intr.extr <- bf(log_biomassarea ~ temp + log_grav_total*Class*Netflow+ 
+biom_mod_inflow.intr.extr <- bf(log_biomassarea ~ Richness +temp + log_grav_total*Class*Netflow+ 
                                      log_InflowBR +log_SelfR + log_btwdegree + 
                                      log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
                                      log_CorridorIndegreeBR + (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree + log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
@@ -507,6 +507,7 @@ all_fit_brms.tot.CRYPTIC.intr.extr %>% rm()  # Full - connectivity through both 
 all_fit_brms.tot.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
                                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.tot.CRYPTIC.intr.extr,"all_fit_brms.tot.CRYPTIC.intr.extr.Rds")
 
 all_fit_brms.tot.CRYPTIC.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.CRYPTIC.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,

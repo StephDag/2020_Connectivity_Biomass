@@ -1,6 +1,6 @@
 # SEM analysis - Global connectivity 
 # author: Steph D'agata
-# date: April 2020
+# date: September 2020
 # outputs: Power of the coefficients
 
 
@@ -223,48 +223,48 @@ for (j in 1:length(coef.rich.RESID)){
  rm(df.rich.TRANSIENT)
  df.rich.TRANSIENT <- temp.rich.TRANSIENT 
  rownames(df.rich.TRANSIENT) <- temp.rich.TRANSIENT[,1]; df.rich.TRANSIENT$temp.rich <- NULL
- saveRDS(df.rich.TRANSIENT,"Richness.power.pred.TRANSIENT")
+ saveRDS(df.rich.TRANSIENT,"Richness.power.pred.TRANSIENT.rds")
  # biomass
  rm(df.biom.TRANSIENT)
  df.biom.TRANSIENT <- temp.biom.TRANSIENT 
  rownames(df.biom.TRANSIENT) <- temp.biom.TRANSIENT[,1]; df.biom.TRANSIENT$temp.biom <- NULL
- saveRDS(df.biom.TRANSIENT,"Biomass.power.pred.TRANSIENT")
+ saveRDS(df.biom.TRANSIENT,"Biomass.power.pred.TRANSIENT.rds")
 
  # RESIDENT
  # richness
  rm(df.rich.RESIDENT)
  df.rich.RESIDENT <- temp.rich.RESID
  rownames(df.rich.RESIDENT) <- temp.rich.RESID[,1]; df.rich.RESIDENT$temp.rich <- NULL
- saveRDS(df.rich.RESIDENT,"Richness.power.pred.RESIDENT")
+ saveRDS(df.rich.RESIDENT,"Richness.power.pred.RESIDENT.rds")
  # biomass
  rm(df.biom.RESIDENT)
  df.biom.RESIDENT <- temp.biom.RESID
  rownames(df.biom.RESIDENT) <- temp.biom.RESID[,1]; df.biom.RESIDENT$temp.biom <- NULL
- saveRDS(df.biom.RESIDENT,"Biomass.power.pred.RESIDENT")
+ saveRDS(df.biom.RESIDENT,"Biomass.power.pred.RESIDENT.rds")
  
  # PARENTAL
  # richness
  rm(df.rich.PARENTAL)
  df.rich.PARENTAL <- temp.rich.PARENTAL 
  rownames(df.rich.PARENTAL) <- temp.rich.PARENTAL[,1]; df.rich.PARENTAL$temp.rich <- NULL
- saveRDS(df.rich.PARENTAL,"Richness.power.pred.PARENTAL")
+ saveRDS(df.rich.PARENTAL,"Richness.power.pred.PARENTAL.rds")
  # biomass
  rm(df.biom.PARENTAL)
  df.biom.PARENTAL <- temp.biom.PARENTAL 
  rownames(df.biom.PARENTAL) <- temp.biom.PARENTAL[,1]; df.biom.PARENTAL$temp.biom <- NULL
- saveRDS(df.biom.PARENTAL,"Biomass.power.pred.PARENTAL")
+ saveRDS(df.biom.PARENTAL,"Biomass.power.pred.PARENTAL.rds")
  
  # CRYPTIC
  # richness
  rm(df.rich.CRYPTIC)
  df.rich.CRYPTIC <- temp.rich.CRYPTIC 
  rownames(df.rich.CRYPTIC) <- temp.rich.CRYPTIC[,1]; df.rich.CRYPTIC$temp.rich <- NULL
- saveRDS(df.rich.CRYPTIC,"Richness.power.pred.CRYPTIC")
+ saveRDS(df.rich.CRYPTIC,"Richness.power.pred.CRYPTIC.rds")
  # biomass
  rm(df.biom.CRYPTIC)
  df.biom.CRYPTIC <- temp.biom.CRYPTIC 
  rownames(df.biom.CRYPTIC) <- temp.biom.CRYPTIC[,1]; df.biom.CRYPTIC$temp.biom <- NULL
- saveRDS(df.biom.CRYPTIC,"Biomass.power.pred.CRYPTIC")
+ saveRDS(df.biom.CRYPTIC,"Biomass.power.pred.CRYPTIC.rds")
  
  
  
