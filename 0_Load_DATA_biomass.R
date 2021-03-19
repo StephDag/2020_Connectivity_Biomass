@@ -19,11 +19,13 @@
 require(dplyr)
 require(here)
 require(forcats)
-
+library(corrgram) # for corrgram
+library(ggpubr)
 
 # load data
 rm(all.data)
-all.data<-read.csv(here("_data","Connectivity_Biomass_SEMGLMMDATA.csv"),h=T, stringsAsFactors = F,dec=".")
+all.data<-read.csv(here("_data","DataBiomassConnectivityBR.csv"),h=T, stringsAsFactors = F,dec=".")
+
 # clean first column
 all.data$X <- NULL
 
@@ -40,7 +42,7 @@ dim(all.data)
 
 # log all the data
 all.data$log_grav_total <- log(all.data$grav_total+1)
-all.data$log_grav_neiBR <- log(all.data$grav_nei+1)
+all.data$log_grav_neiBR <- log(all.data$grav_neiBR+1)
 all.data$log_biomassarea <-log(all.data$biomassarea1+1)
 
 # chage to factor
@@ -49,12 +51,57 @@ all.data$locality <- as.factor(all.data$locality)
 all.data$sites <- as.factor(all.data$sites)
 all.data$Class <- as.factor(all.data$Class)
 all.data$ModelMode <- as.factor(all.data$ModelMode)
-all.data$Larval_behaviour <- as.factor(all.data$Larval_behaviour)
+all.data$Larval_behaviour <- as.factor(all.data$Larval_beh)
 all.data$FE <- as.factor(all.data$FE)
 
 # Transform connection with MPAs
-all.data$IndegreeMPABR.bin <- ifelse(all.data$IndegreeMPABR == 0,0,1) %>% as.factor()
-all.data$IndegreeMPABR.bin %>% summary()
+all.data$IndegreeMPA.bin <- ifelse(all.data$IndegreeMPABR == 0,0,1) %>% as.factor()
+all.data$IndegreeMPA.bin %>% summary()
+
+# load data for productivity
+rm(all.data.prod)
+all.data.prod<-read.csv(here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.csv"),h=T, stringsAsFactors = F,dec=".")
+  
+  # summarize productivity to annual productivity
+all.data.prod <- all.data.prod %>%   
+  rowwise() %>%
+  mutate(prod.annual = mean(c(prod.Jan:prod.Dec),na.rm=T)) %>%
+  as.data.frame()
+  
+  # subset dataset for only ID, sites and annual productivity
+rm(all.data.prod.sub )
+all.data.prod.sub <- all.data.prod %>% dplyr::select(ID,sites,Netflow,prod.annual)
+
+  # merge with global BR dataset
+all.data <- left_join(all.data,all.data.prod.sub,by="ID")
+
+    # check if sites similar
+match(as.character(all.data$sites.x), as.factor(all.data$sites.y))
+cbind(as.character(all.data$sites.x),all.data$sites.y)
+
+# save all.data file
+saveRDS(all.data,here::here("_data","DataBiomassConnectivityBR_March2021.rds"))
+
+# correlation between connectivity attributes
+connectivity <- all.data[,c("SelfR","InflowBR","IndegreeBR",        
+                            "CorridorIndegreeBR","IndegreeMPABR","InflowMPABR",       
+                            "IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree","Netflow")] 
+corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
+                              upper.panel=panel.cor, text.panel=panel.txt)
+
+ggexport(corr.connectivity,filename=here("_prelim.figures","Correlations","Corr_connectivity.pdf"),width=20,height=12)
+
+# correlation between environmental + human attributes
+env_human <- all.data[,c("log_grav_total","log_grav_neiBR","temp","prod.annual","Age_of_protection")] 
+corr.env_human <- corrgram(env_human,order=TRUE, lower.panel=panel.shade,
+                              upper.panel=panel.cor, text.panel=panel.txt)
+
+ggexport(corr.env_human,filename=here("_prelim.figures","Correlations","Corr_env_human.pdf"),width=20,height=12)
+
+ggplot(all.data,aes(x=log_grav_total,y=log_grav_neiBR)) +
+  geom_point() +
+  geom_smooth()
+
 # Transient
 TRANSIENT %>% rm()
 TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "transi15") %>% droplevels()
@@ -63,17 +110,6 @@ TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "tr
 TRANSIENT$Class <- relevel(TRANSIENT$Class, ref="Fished")
 summary(TRANSIENT)
 
-library(corrgram)
-corrgram(TRANSIENT,order=TRUE, lower.panel=panel.shade,
-         upper.panel=panel.pie, text.panel=panel.txt)
-
-connectivity <- all.data[,c("SelfR","InflowBR","IndegreeBR",        
-                            "CorridorIndegreeBR","IndegreeMPABR","InflowMPABR",       
-                            "IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree")] 
-corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
-                              upper.panel=panel.cor, text.panel=panel.txt)
-
-ggsave(here("_prelim.figures","Corr_connectivity.pdf"),corr.connectivity,width=20,height=12)
 
 ## standrdize x variables
 rm(TRANSIENT.std)

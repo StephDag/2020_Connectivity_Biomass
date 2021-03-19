@@ -1,6 +1,7 @@
 # SEM analysis - Global connectivity 
 # author: Steph D'agata
 # date: April 2020
+# updated: March 2021
 # outputs: SEM coefficients
 
 #rm(list=ls())
@@ -28,9 +29,8 @@ require(rstan)
 
 # load data
 rm(all.data)
-all.data<-read.csv(here("_data","Connectivity_Biomass_SEMGLMMDATA.csv"),h=T, stringsAsFactors = F,dec=".")
-# clean first column
-all.data$X <- NULL
+all.data <- readRDS(here::here("_data","DataBiomassConnectivityBR_March2021.rds"))
+#all.data<-read.csv(here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.csv"),h=T, stringsAsFactors = F,dec=".")
 
 # check 
 head(all.data)
@@ -40,26 +40,8 @@ summary(all.data)
 str(all.data)
 names(all.data)
 apply(all.data,2,class)
-
 dim(all.data)
 
-# log all the data
-all.data$log_grav_total <- log(all.data$grav_total+1)
-all.data$log_grav_neiBR <- log(all.data$grav_nei+1)
-all.data$log_biomassarea <-log(all.data$biomassarea1+1)
-
-# chage to factor
-all.data$region <- as.factor(all.data$region)
-all.data$locality <- as.factor(all.data$locality)
-all.data$sites <- as.factor(all.data$sites)
-all.data$Class <- as.factor(all.data$Class)
-all.data$ModelMode <- as.factor(all.data$ModelMode)
-all.data$Larval_behaviour <- as.factor(all.data$Larval_behaviour)
-all.data$FE <- as.factor(all.data$FE)
-
-# Transform connection with MPAs
-all.data$IndegreeMPABR.bin <- ifelse(all.data$IndegreeMPABR == 0,0,1) %>% as.factor()
-all.data$IndegreeMPABR.bin %>% summary()
 # Transient
 TRANSIENT %>% rm()
 TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "transi15") %>% droplevels()
