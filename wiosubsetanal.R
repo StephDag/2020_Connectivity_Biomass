@@ -17,4 +17,5 @@ nc_sp <- sf:::as_Spatial(nc$geom)
 head(wiompa)
 levels(wiompa$Designation)
 
+##intersect polygons
 
