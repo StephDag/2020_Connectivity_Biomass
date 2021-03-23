@@ -17,8 +17,10 @@
 # stan
 #remove.packages("rstan")
 #if (file.exists(".RData")) file.remove(".RData")
-#pkgbuild::has_build_tools(debug = TRUE)
-#install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
+
+#Sys.setenv(MAKEFLAGS = "-j4") # four cores used
+#install.packages(c("Rcpp", "RcppEigen", "RcppParallel", "StanHeaders"), type = "source")
+#install.packages("rstan", type = "source")
 
 # packages
 require(dplyr)
@@ -28,248 +30,97 @@ require(brms)
 require(rstan)
 
 # load data
-rm(all.data)
-all.data <- readRDS(here::here("_data","DataBiomassConnectivityBR_March2021.rds"))
+#rm(all.data)
+#all.data <- readRDS(here::here("_data","DataBiomassConnectivityBR_March2021.rds"))
 #all.data<-read.csv(here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.csv"),h=T, stringsAsFactors = F,dec=".")
 
 # check 
-head(all.data)
-summary(all.data)
-dim(all.data)
-summary(all.data)
-str(all.data)
-names(all.data)
-apply(all.data,2,class)
-dim(all.data)
-
-# Transient
-TRANSIENT %>% rm()
-TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "transi15") %>% droplevels()
-
-# Fished as the reference
-TRANSIENT$Class <- relevel(TRANSIENT$Class, ref="Fished")
-summary(TRANSIENT)
-
-library(corrgram)
-corrgram(TRANSIENT,order=TRUE, lower.panel=panel.shade,
-         upper.panel=panel.pie, text.panel=panel.txt)
-
-connectivity <- all.data[,c("SelfR","InflowBR","IndegreeBR",        
-"CorridorIndegreeBR","IndegreeMPABR","InflowMPABR",       
-"IndegreeNeiBR","InflowNeiBR","OutFlow","Outdegree","btwdegree")] 
-corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
-         upper.panel=panel.cor, text.panel=panel.txt)
-
-ggsave(here("_prelim.figures","Corr_connectivity.pdf"),corr.connectivity,width=20,height=12)
-
-## standrdize x variables
-rm(TRANSIENT.std)
-TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-TRANSIENT.std <- cbind(TRANSIENT$region,TRANSIENT.std)
-TRANSIENT.std <- cbind(TRANSIENT$Class,TRANSIENT.std)
-
-colnames(TRANSIENT.std)[c(1,2)] <- c("Class","region")
-names(TRANSIENT.std)# add log biomass
-
-TRANSIENT.std$log_InflowBR<-log(TRANSIENT.std$Inflow+1)
-TRANSIENT.std$log_IndegreeBR<-log(TRANSIENT.std$Indegree+1)
-TRANSIENT.std$log_SelfR<-log(TRANSIENT.std$SelfR+1)
-TRANSIENT.std$log_InflowMPABR<-log(TRANSIENT.std$InflowMPA+1)
-TRANSIENT.std$log_IndegreeMPABR<-log(TRANSIENT.std$IndegreeMPA+1)
-TRANSIENT.std$log_InflowNeiBR<-log(TRANSIENT.std$InflowNei+1)
-TRANSIENT.std$log_CorridorIndegreeBR <-log(TRANSIENT.std$CorridorIndegree+1)
-TRANSIENT.std$log_btwdegree <-log(TRANSIENT.std$btwdegree+1)
-TRANSIENT.std$log_outdegree <-log(TRANSIENT.std$Outdegree+1)
-TRANSIENT.std$Class <- relevel(TRANSIENT.std$Class, ref="Fished")
-TRANSIENT.std$Netflow<- TRANSIENT$Netflow
-TRANSIENT.std$log_biomassarea <- TRANSIENT$log_biomassarea
-TRANSIENT.std$log_grav_total <- TRANSIENT$log_grav_total
-TRANSIENT.std$log_grav_neiBR  <- TRANSIENT$log_grav_neiBR
-head(TRANSIENT.std)
-dim(TRANSIENT.std)
-summary(TRANSIENT.std)
-
-# Parental
-PARENTAL %>% rm()
-PARENTAL <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "pare5") %>% droplevels()
-
-# Fished as the reference
-PARENTAL$Class <- relevel(PARENTAL$Class, ref="Fished")
-summary(PARENTAL.std)
-
-## standrdize x variables
-rm(PARENTAL.std)
-PARENTAL.std<-data.frame(apply(X = PARENTAL[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#PARENTAL.std<-data.frame(apply(X = PARENTAL[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-PARENTAL.std <- cbind(PARENTAL$region,PARENTAL.std)
-PARENTAL.std <- cbind(PARENTAL$Class,PARENTAL.std)
-
-colnames(PARENTAL.std)[c(1,2)] <- c("Class","region")
-names(PARENTAL.std)# add log biomass
-
-PARENTAL.std$log_InflowBR<-log(PARENTAL.std$Inflow+1)
-PARENTAL.std$log_IndegreeBR<-log(PARENTAL.std$Indegree+1)
-PARENTAL.std$log_SelfR<-log(PARENTAL.std$SelfR+1)
-PARENTAL.std$log_InflowMPABR<-log(PARENTAL.std$InflowMPA+1)
-PARENTAL.std$log_IndegreeMPABR<-log(PARENTAL.std$IndegreeMPA+1)
-PARENTAL.std$log_InflowNeiBR<-log(PARENTAL.std$InflowNei+1)
-PARENTAL.std$log_CorridorIndegreeBR <-log(PARENTAL.std$CorridorIndegree+1)
-PARENTAL.std$log_btwdegree <-log(PARENTAL.std$btwdegree+1)
-PARENTAL.std$log_outdegree <-log(PARENTAL.std$Outdegree+1)
-PARENTAL.std$Class <- relevel(PARENTAL.std$Class, ref="Fished")
-PARENTAL.std$Netflow<- PARENTAL$Netflow
-PARENTAL.std$log_biomassarea <- PARENTAL$log_biomassarea
-PARENTAL.std$log_grav_total <- PARENTAL$log_grav_total
-PARENTAL.std$log_grav_neiBR  <- PARENTAL$log_grav_neiBR
-head(PARENTAL.std)
-dim(PARENTAL.std)
-summary(PARENTAL.std)
-
-# Cryptic
-CRYPTIC %>% rm()
-CRYPTIC <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "crypto5") %>% droplevels()
-
-# Fished as the reference
-CRYPTIC$Class <- relevel(CRYPTIC$Class, ref="Fished")
-summary(CRYPTIC)
-
-
-## standrdize x variables
-rm(CRYPTIC.std)
-CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-CRYPTIC.std <- cbind(CRYPTIC$region,CRYPTIC.std)
-CRYPTIC.std <- cbind(CRYPTIC$Class,CRYPTIC.std)
-
-colnames(CRYPTIC.std)[c(1,2)] <- c("Class","region")
-names(CRYPTIC.std)# add log biomass
-
-CRYPTIC.std$log_InflowBR<-log(CRYPTIC.std$Inflow+1)
-CRYPTIC.std$log_IndegreeBR<-log(CRYPTIC.std$Indegree+1)
-CRYPTIC.std$log_SelfR<-log(CRYPTIC.std$SelfR+1)
-CRYPTIC.std$log_InflowMPABR<-log(CRYPTIC.std$InflowMPA+1)
-CRYPTIC.std$log_IndegreeMPABR<-log(CRYPTIC.std$IndegreeMPA+1)
-CRYPTIC.std$log_InflowNeiBR<-log(CRYPTIC.std$InflowNei+1)
-CRYPTIC.std$log_CorridorIndegreeBR <-log(CRYPTIC.std$CorridorIndegree+1)
-CRYPTIC.std$log_btwdegree <-log(CRYPTIC.std$btwdegree+1)
-CRYPTIC.std$log_outdegree <-log(CRYPTIC.std$Outdegree+1)
-CRYPTIC.std$Class <- relevel(CRYPTIC.std$Class, ref="Fished")
-CRYPTIC.std$Netflow<- CRYPTIC$Netflow
-CRYPTIC.std$log_biomassarea <- CRYPTIC$log_biomassarea
-CRYPTIC.std$log_grav_total <- CRYPTIC$log_grav_total
-CRYPTIC.std$log_grav_neiBR  <- CRYPTIC$log_grav_neiBR
-head(CRYPTIC.std)
-dim(CRYPTIC.std)
-summary(CRYPTIC.std)
-
-# Resident
-RESID %>% rm()
-RESID <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "resid15") %>% droplevels()
-
-# Fished as the reference
-RESID$Class <- relevel(RESID$Class, ref="Fished")
-summary(RESID)
-
-## standrdize x variables
-rm(RESID.std)
-RESID.std<-data.frame(apply(X = RESID[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#RESID.std<-data.frame(apply(X = RESID[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-RESID.std <- cbind(RESID$region,RESID.std)
-RESID.std <- cbind(RESID$Class,RESID.std)
-
-colnames(RESID.std)[c(1,2)] <- c("Class","region")
-names(RESID.std)# add log biomass
-
-RESID.std$log_InflowBR<-log(RESID.std$Inflow+1)
-RESID.std$log_IndegreeBR<-log(RESID.std$Indegree+1)
-RESID.std$log_SelfR<-log(RESID.std$SelfR+1)
-RESID.std$log_InflowMPABR<-log(RESID.std$InflowMPA+1)
-RESID.std$log_IndegreeMPABR<-log(RESID.std$IndegreeMPA+1)
-RESID.std$log_InflowNeiBR<-log(RESID.std$InflowNei+1)
-RESID.std$log_CorridorIndegreeBR <-log(RESID.std$CorridorIndegree+1)
-RESID.std$log_btwdegree <-log(RESID.std$btwdegree+1)
-RESID.std$log_outdegree <-log(RESID.std$Outdegree+1)
-RESID.std$Class <- relevel(RESID.std$Class, ref="Fished")
-RESID.std$Netflow<- RESID$Netflow
-RESID.std$log_biomassarea <- RESID$log_biomassarea
-RESID.std$log_grav_total <- RESID$log_grav_total
-RESID.std$log_grav_neiBR  <- RESID$log_grav_neiBR
-head(RESID.std)
-dim(RESID.std)
-summary(RESID.std)
+#head(all.data)
+#summary(all.data)
+#dim(all.data)
+#summary(all.data)
+#str(all.data)
+#names(all.data)
+#apply(all.data,2,class)
+#dim(all.data)
 
 # built SEM model
 # scaled 
   # gravity of neightbour is highly positively correlated with connectivity variables
-rm(species_mod_inflow.intr) # ENV + CON
-species_mod_inflow.intr <- bf(Richness ~ temp + log_grav_total*Class*Netflow  + 
-                    log_InflowBR +log_SelfR + log_btwdegree +
-                      (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree + Netflow |region))
 
+#rm(species_mod_inflow.intr) # ENV + CON
+#species_mod_inflow.intr <- bf(Richness ~ temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+#                      log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn + 
+#                      (1+   temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+#    log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn |region))
+
+#### SPECIES RICHNESS = Environment + Connectivity
 rm(species_mod_inflow.intr.extr) # ENV + CON
-species_mod_inflow.intr.extr <- bf(Richness ~ temp + log_grav_total*Class*Netflow+ 
-                                log_InflowBR +log_SelfR + log_btwdegree + 
-                                log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
-                                log_CorridorIndegreeBR + (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree + log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
-                                   log_CorridorIndegreeBR + Netflow |region))
-rm(species_mod_inflow.intr.extr.simp) # ENV + CON
-species_mod_inflow.intr.extr.simp <- bf(Richness ~ temp + log_grav_total*Class*Netflow+ 
-                                     log_InflowBR +log_SelfR +  
-                                     log_grav_neiBR +  log_InflowNeiBR  + 
-                                     (1+ log_grav_total + log_InflowBR +log_SelfR +  log_grav_neiBR + log_InflowNeiBR  + Netflow |region))
+species_mod_inflow.intr.extr <- bf(Richness ~ temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+                                     log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn + 
+                                     (1+   temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+                                        log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn |region))
 
-rm(biom_mod_inflow.intr) # ENV + CON intr +S 
-biom_mod_inflow.intr <- bf(log_biomassarea ~ Richness + temp + log_grav_total*Class*Netflow  + 
-                             log_InflowBR +log_SelfR + log_btwdegree +  
-                             (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree+ Netflow |region))
-
-rm(biom_mod_inflow.intr.extr) # ENV + CON
-biom_mod_inflow.intr.extr <- bf(log_biomassarea ~ Richness +temp + log_grav_total*Class*Netflow+ 
-                                     log_InflowBR +log_SelfR + log_btwdegree + 
-                                     log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
-                                     log_CorridorIndegreeBR + (1+ log_grav_total + log_InflowBR +log_SelfR + log_btwdegree + log_grav_neiBR + log_InflowMPABR + log_InflowNeiBR +
-                                                                 log_CorridorIndegreeBR + Netflow |region))
-
-rm(biom_mod_inflow.intr.extr.simp) # ENV + CON
-biom_mod_inflow.intr.extr.simp <- bf(log_biomassarea ~ Richness + temp + log_grav_total*Class*Netflow+ 
-                                       log_InflowBR +log_SelfR +  
-                                       log_grav_neiBR +  log_InflowNeiBR  + 
-                                       (1+ log_grav_total + log_InflowBR +log_SelfR +  log_grav_neiBR + log_InflowNeiBR  + Netflow |region))
-rm(biom_mod_nocon.S) # ENV + S
-biom_mod_nocon.S <- bf(log_biomassarea ~ Richness+temp + log_grav_total*Class  + (1+ log_grav_total|region))
-
+#### SPECIES RICHNESS = Environment
 rm(S_mod_nocon) # ENV
-S_mod_nocon <- bf(Richness ~ temp + log_grav_total*Class  + (1+ log_grav_total|region))
+S_mod_nocon <- bf(Richness ~ temp + prod.annual + log_grav_total*Class  + (1+ temp + prod.annual+ log_grav_total|region))
+
+#rm(species_mod_inflow.intr.extr.simp) # ENV + CON
+#species_mod_inflow.intr.extr.simp <- bf(Richness ~ temp + log_grav_total*Class*Netflow+ 
+#                                     log_InflowBR +log_SelfR +  
+#                                     log_grav_neiBR +  log_InflowNeiBR  + 
+#                                     (1+ log_grav_total + log_InflowBR +log_SelfR +  log_grav_neiBR + log_InflowNeiBR  + Netflow |region))
+
+
+#rm(biom_mod_inflow.intr) # ENV + CON intr +S 
+#biom_mod_inflow.intr <- bf(log_biomassarea ~ Richness + temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+#                             log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn + 
+#                             (1+   temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+#                                log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn |region))
+
+#### BIOMASS = Environment + Connectivity
+rm(biom_mod_inflow.intr.extr) # ENV + CON
+biom_mod_inflow.intr.extr <- bf(log_biomassarea ~ Richness +temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+                                  log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn + 
+                                  (1+   temp + prod.annual + log_grav_total*Class*Netflow  + log_InflowMPA+
+                                     log_SelfR + log_btwdegree +log_grav_neiBR + log_InflowNei +log_CorridorIn |region))
+
+#rm(biom_mod_inflow.intr.extr.simp) # ENV + CON
+#biom_mod_inflow.intr.extr.simp <- bf(log_biomassarea ~ Richness + temp + log_grav_total*Class*Netflow+ 
+#                                       log_InflowBR +log_SelfR +  
+#                                       log_grav_neiBR +  log_InflowNeiBR  + 
+#                                       (1+ log_grav_total + log_InflowBR +log_SelfR +  log_grav_neiBR + log_InflowNeiBR  + Netflow |region))
+rm(biom_mod_nocon.S) # ENV + S
+biom_mod_nocon.S <- bf(log_biomassarea ~ Richness +temp + prod.annual + log_grav_total*Class  + (1+ Richness +temp + prod.annual + log_grav_total|region))
 
 # SEM
 ## scaled
     # all_fit_brms = connectivity explains both biomass and species richness
 #TRANSIENT total
-all_fit_brms.tot.TRANSIENT.intr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                   iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.TRANSIENT.intr,"all_fit_brms.tot.TRANSIENT.intr.Rds")
+#all_fit_brms.tot.TRANSIENT.intr %>% rm()  # Full - connectivity through both S and B
+#all_fit_brms.tot.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
+#                   iter = 500, warmup = 100,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.tot.TRANSIENT.intr,"all_fit_brms.tot.TRANSIENT.intr.Rds")
+
 all_fit_brms.tot.TRANSIENT.intr.extr %>% rm()  # Full - connectivity through both S and B
 all_fit_brms.tot.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
                                       iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                       prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr,"all_fit_brms.tot.TRANSIENT.intr.extr.Rds")
 
-all_fit_brms.tot.TRANSIENT.intr.extr.simp %>% rm()  # Simple - connectivity through both S and B
-all_fit_brms.tot.TRANSIENT.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr.simp,"all_fit_brms.tot.TRANSIENT.intr.extr.simp.Rds")
-
+#all_fit_brms.tot.TRANSIENT.intr.extr.simp %>% rm()  # Simple - connectivity through both S and B
+#all_fit_brms.tot.TRANSIENT.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
+#                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr.simp,"all_fit_brms.tot.TRANSIENT.intr.extr.simp.Rds")
 
 #TRANSIENT species mediated
-all_fit_brms.nocon.S.TRANSIENT.intr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                                     iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                     prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.TRANSIENT.intr,"all_fit_brms.nocon.S.TRANSIENT.intr.Rds")
+#all_fit_brms.nocon.S.TRANSIENT.intr %>% rm() # connectivity only through S + ENV
+#all_fit_brms.nocon.S.TRANSIENT.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
+#                                     iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                                     prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.nocon.S.TRANSIENT.intr,"all_fit_brms.nocon.S.TRANSIENT.intr.Rds")
 
 all_fit_brms.nocon.S.TRANSIENT.intr.extr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
@@ -284,37 +135,38 @@ all_fit_brms.nocon.TRANSIENT <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(F
                                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 saveRDS(all_fit_brms.nocon.TRANSIENT,"all_fit_brms.nocon.TRANSIENT.Rds")
 
+#
 
-TRANSIENT.weight <- model_weights(all_fit_brms.tot.TRANSIENT.intr,
+TRANSIENT.weight <- model_weights(#all_fit_brms.tot.TRANSIENT.intr,
                                   all_fit_brms.tot.TRANSIENT.intr.extr,
-                                  all_fit_brms.nocon.S.TRANSIENT.intr,
+                                  #all_fit_brms.nocon.S.TRANSIENT.intr,
                                   all_fit_brms.nocon.S.TRANSIENT.intr.extr,
-                                  all_fit_brms.tot.TRANSIENT.intr.extr.simp,
+                                  #all_fit_brms.tot.TRANSIENT.intr.extr.simp,
                                   all_fit_brms.nocon.TRANSIENT,weights = "loo")
 
-TRANSIENT.LOO <- LOO(all_fit_brms.tot.TRANSIENT.intr,
+TRANSIENT.LOO <- LOO(#all_fit_brms.tot.TRANSIENT.intr,
                      all_fit_brms.tot.TRANSIENT.intr.extr,
-                     all_fit_brms.nocon.S.TRANSIENT.intr,
+                     #all_fit_brms.nocon.S.TRANSIENT.intr,
                      all_fit_brms.nocon.S.TRANSIENT.intr.extr,
-                     all_fit_brms.tot.TRANSIENT.intr.extr.simp,
+                     #all_fit_brms.tot.TRANSIENT.intr.extr.simp,
                      all_fit_brms.nocon.TRANSIENT)
-WAIC(all_fit_brms.tot.TRANSIENT.intr,
+WAIC(#all_fit_brms.tot.TRANSIENT.intr,
      all_fit_brms.tot.TRANSIENT.intr.extr,
-     all_fit_brms.nocon.S.TRANSIENT.intr,
+     #all_fit_brms.nocon.S.TRANSIENT.intr,
      all_fit_brms.nocon.S.TRANSIENT.intr.extr,
-     all_fit_brms.tot.TRANSIENT.intr.extr.simp,
+     #all_fit_brms.tot.TRANSIENT.intr.extr.simp,
      all_fit_brms.nocon.TRANSIENT)
 
-TRANSIENT.R2 <- rbind(bayes_R2(all_fit_brms.tot.TRANSIENT.intr),
+TRANSIENT.R2 <- rbind(#bayes_R2(all_fit_brms.tot.TRANSIENT.intr),
 bayes_R2(all_fit_brms.tot.TRANSIENT.intr.extr),
-bayes_R2(all_fit_brms.nocon.S.TRANSIENT.intr),
+#bayes_R2(all_fit_brms.nocon.S.TRANSIENT.intr),
 bayes_R2(all_fit_brms.nocon.S.TRANSIENT.intr.extr),
-bayes_R2(all_fit_brms.tot.TRANSIENT.intr.extr.simp),
+#bayes_R2(all_fit_brms.tot.TRANSIENT.intr.extr.simp),
 bayes_R2(all_fit_brms.nocon.TRANSIENT))
 
-mcmc_plot(all_fit_brms.tot.TRANSIENT.intr)
+#mcmc_plot(all_fit_brms.tot.TRANSIENT.intr)
 mcmc_plot(all_fit_brms.tot.TRANSIENT.intr.extr)
-mcmc_plot(all_fit_brms.nocon.S.TRANSIENT.intr)
+#mcmc_plot(all_fit_brms.nocon.S.TRANSIENT.intr)
 mcmc_plot(all_fit_brms.nocon.S.TRANSIENT.intr.extr)
 mcmc_plot(all_fit_brms.nocon.TRANSIENT)
 
@@ -328,7 +180,7 @@ library("rstanarm")
 require(ggpubr)
 
 posterior.TRANSIENT.tot <- as.array(all_fit_brms.tot.TRANSIENT.intr.extr)
-posterior.TRANSIENT.simp <- as.array(all_fit_brms.simp.TRANSIENT)
+#posterior.TRANSIENT.simp <- as.array(all_fit_brms.simp.TRANSIENT)
 
 # RESID
 all_fit_brms.tot.RESID.intr %>% rm()  # Full - connectivity through both S and B
@@ -556,14 +408,14 @@ require(ggpubr)
 
 
 # TRANSIENT TOT
-a <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr.extr)
+a <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr)
 
 # no classification
 rich.var <- as.data.frame(a$data)[grep("b_Richness",as.data.frame(a$data)[,"parameter"]),"parameter"]
 biom.var <- as.data.frame(a$data)[grep("b_logbiomassarea",as.data.frame(a$data)[,"parameter"]),"parameter"]
 
-Richness_inflow_TRANSIENT_tot <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr.extr, pars = as.character(rich.var))
-Biomass_inflow_TRANSIENT_tot <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr.extr,pars = as.character(biom.var))
+Richness_inflow_TRANSIENT_tot <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr, pars = as.character(rich.var))
+Biomass_inflow_TRANSIENT_tot <- mcmc_intervals(all_fit_brms.tot.TRANSIENT.intr,pars = as.character(biom.var))
 
 rm(a)
 

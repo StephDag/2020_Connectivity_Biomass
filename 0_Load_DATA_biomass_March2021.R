@@ -62,6 +62,9 @@ all.data <- all.data%>%
   mutate(prod.annual = mean(c(prod.Jan:prod.Dec),na.rm=T)) %>%
   as.data.frame()
 
+# rm NAs for netflow
+all.data <- all.data %>% filter(!is.na(Netflow))
+
 # save all.data file
 saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
 
@@ -93,34 +96,43 @@ TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "tr
 TRANSIENT$Class <- relevel(TRANSIENT$Class, ref="Fished")
 summary(TRANSIENT)
 
+# log transformed skewed data
+TRANSIENT$log_btwdegree <- log(TRANSIENT$btwdegree+1)
+TRANSIENT$log_SelfR <- log(TRANSIENT$SelfR+1)
+TRANSIENT$log_CorridorIn <- log(TRANSIENT$CorridorIn+1)
+TRANSIENT$log_InflowMPA <- log(TRANSIENT$InflowMPA+1)
+TRANSIENT$log_InflowNei <- log(TRANSIENT$InflowNei+1)
+TRANSIENT$log_annual_prod <- log(log(TRANSIENT$prod.annual+1))
 
 ## standrdize x variables
 rm(TRANSIENT.std)
-TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("temp","Age_of_pro","prod.annual",
+                                                 "Netflow","log_grav_total","log_grav_neiBR",
+                                                 "log_btwdegree","log_SelfR","log_CorridorIn",  
+                                                 "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+# add management and region
 TRANSIENT.std <- cbind(TRANSIENT$region,TRANSIENT.std)
 TRANSIENT.std <- cbind(TRANSIENT$Class,TRANSIENT.std)
-
 colnames(TRANSIENT.std)[c(1,2)] <- c("Class","region")
-names(TRANSIENT.std)# add log biomass
 
-TRANSIENT.std$log_InflowBR<-log(TRANSIENT.std$Inflow+1)
-TRANSIENT.std$log_IndegreeBR<-log(TRANSIENT.std$Indegree+1)
-TRANSIENT.std$log_SelfR<-log(TRANSIENT.std$SelfR+1)
-TRANSIENT.std$log_InflowMPABR<-log(TRANSIENT.std$InflowMPA+1)
-TRANSIENT.std$log_IndegreeMPABR<-log(TRANSIENT.std$IndegreeMPA+1)
-TRANSIENT.std$log_InflowNeiBR<-log(TRANSIENT.std$InflowNei+1)
-TRANSIENT.std$log_CorridorIndegreeBR <-log(TRANSIENT.std$CorridorIndegree+1)
-TRANSIENT.std$log_btwdegree <-log(TRANSIENT.std$btwdegree+1)
-TRANSIENT.std$log_outdegree <-log(TRANSIENT.std$Outdegree+1)
-TRANSIENT.std$Class <- relevel(TRANSIENT.std$Class, ref="Fished")
-TRANSIENT.std$Netflow<- TRANSIENT$Netflow
+# add biomass and richness
 TRANSIENT.std$log_biomassarea <- TRANSIENT$log_biomassarea
-TRANSIENT.std$log_grav_total <- TRANSIENT$log_grav_total
-TRANSIENT.std$log_grav_neiBR  <- TRANSIENT$log_grav_neiBR
+TRANSIENT.std$Richness <- TRANSIENT$Richness
+
+
+ggplot(TRANSIENT.std,aes(x=log_InflowNei,y=log_biomassarea)) +
+  geom_point() +
+  geom_smooth(method="gam")
+
+
 head(TRANSIENT.std)
 dim(TRANSIENT.std)
 summary(TRANSIENT.std)
+
+
+
+names(TRANSIENT.std)# add log biomass
+
 
 # Parental
 PARENTAL %>% rm()
