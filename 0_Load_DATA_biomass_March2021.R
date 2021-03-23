@@ -65,6 +65,14 @@ all.data <- all.data%>%
 # rm NAs for netflow
 all.data <- all.data %>% filter(!is.na(Netflow))
 
+# log transformed skewed data
+all.data$log_btwdegree <- log(all.data$btwdegree+1)
+all.data$log_SelfR <- log(all.data$SelfR+1)
+all.data$log_CorridorIn <- log(all.data$CorridorIn+1)
+all.data$log_InflowMPA <- log(all.data$InflowMPA+1)
+all.data$log_InflowNei <- log(all.data$InflowNei+1)
+all.data$log_annual_prod <- log(log(all.data$prod.annual+1))
+
 # save all.data file
 saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
 
@@ -96,14 +104,6 @@ TRANSIENT <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "tr
 TRANSIENT$Class <- relevel(TRANSIENT$Class, ref="Fished")
 summary(TRANSIENT)
 
-# log transformed skewed data
-TRANSIENT$log_btwdegree <- log(TRANSIENT$btwdegree+1)
-TRANSIENT$log_SelfR <- log(TRANSIENT$SelfR+1)
-TRANSIENT$log_CorridorIn <- log(TRANSIENT$CorridorIn+1)
-TRANSIENT$log_InflowMPA <- log(TRANSIENT$InflowMPA+1)
-TRANSIENT$log_InflowNei <- log(TRANSIENT$InflowNei+1)
-TRANSIENT$log_annual_prod <- log(log(TRANSIENT$prod.annual+1))
-
 ## standrdize x variables
 rm(TRANSIENT.std)
 TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("temp","Age_of_pro","prod.annual",
@@ -128,9 +128,6 @@ ggplot(TRANSIENT.std,aes(x=log_InflowNei,y=log_biomassarea)) +
 head(TRANSIENT.std)
 dim(TRANSIENT.std)
 summary(TRANSIENT.std)
-
-
-
 names(TRANSIENT.std)# add log biomass
 
 
@@ -140,35 +137,23 @@ PARENTAL <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "par
 
 # Fished as the reference
 PARENTAL$Class <- relevel(PARENTAL$Class, ref="Fished")
-summary(PARENTAL.std)
+summary(PARENTAL)
 
-## standrdize x variables
+## standardize x variables
 rm(PARENTAL.std)
-PARENTAL.std<-data.frame(apply(X = PARENTAL[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#PARENTAL.std<-data.frame(apply(X = PARENTAL[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+PARENTAL.std<-data.frame(apply(X = PARENTAL[,c("temp","Age_of_pro","prod.annual",
+                                                "Netflow","log_grav_total","log_grav_neiBR",
+                                                "log_btwdegree","log_SelfR","log_CorridorIn",  
+                                                "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+
+# add management and region
 PARENTAL.std <- cbind(PARENTAL$region,PARENTAL.std)
 PARENTAL.std <- cbind(PARENTAL$Class,PARENTAL.std)
-
 colnames(PARENTAL.std)[c(1,2)] <- c("Class","region")
-names(PARENTAL.std)# add log biomass
 
-PARENTAL.std$log_InflowBR<-log(PARENTAL.std$Inflow+1)
-PARENTAL.std$log_IndegreeBR<-log(PARENTAL.std$Indegree+1)
-PARENTAL.std$log_SelfR<-log(PARENTAL.std$SelfR+1)
-PARENTAL.std$log_InflowMPABR<-log(PARENTAL.std$InflowMPA+1)
-PARENTAL.std$log_IndegreeMPABR<-log(PARENTAL.std$IndegreeMPA+1)
-PARENTAL.std$log_InflowNeiBR<-log(PARENTAL.std$InflowNei+1)
-PARENTAL.std$log_CorridorIndegreeBR <-log(PARENTAL.std$CorridorIndegree+1)
-PARENTAL.std$log_btwdegree <-log(PARENTAL.std$btwdegree+1)
-PARENTAL.std$log_outdegree <-log(PARENTAL.std$Outdegree+1)
-PARENTAL.std$Class <- relevel(PARENTAL.std$Class, ref="Fished")
-PARENTAL.std$Netflow<- PARENTAL$Netflow
+# add biomass and richness
 PARENTAL.std$log_biomassarea <- PARENTAL$log_biomassarea
-PARENTAL.std$log_grav_total <- PARENTAL$log_grav_total
-PARENTAL.std$log_grav_neiBR  <- PARENTAL$log_grav_neiBR
-head(PARENTAL.std)
-dim(PARENTAL.std)
-summary(PARENTAL.std)
+PARENTAL.std$Richness <- PARENTAL$Richness
 
 # Cryptic
 CRYPTIC %>% rm()
@@ -178,34 +163,21 @@ CRYPTIC <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "cryp
 CRYPTIC$Class <- relevel(CRYPTIC$Class, ref="Fished")
 summary(CRYPTIC)
 
-
 ## standrdize x variables
 rm(CRYPTIC.std)
-CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c("temp","Age_of_pro","prod.annual",
+                                               "Netflow","log_grav_total","log_grav_neiBR",
+                                               "log_btwdegree","log_SelfR","log_CorridorIn",  
+                                               "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+
+# add management and region
 CRYPTIC.std <- cbind(CRYPTIC$region,CRYPTIC.std)
 CRYPTIC.std <- cbind(CRYPTIC$Class,CRYPTIC.std)
-
 colnames(CRYPTIC.std)[c(1,2)] <- c("Class","region")
-names(CRYPTIC.std)# add log biomass
 
-CRYPTIC.std$log_InflowBR<-log(CRYPTIC.std$Inflow+1)
-CRYPTIC.std$log_IndegreeBR<-log(CRYPTIC.std$Indegree+1)
-CRYPTIC.std$log_SelfR<-log(CRYPTIC.std$SelfR+1)
-CRYPTIC.std$log_InflowMPABR<-log(CRYPTIC.std$InflowMPA+1)
-CRYPTIC.std$log_IndegreeMPABR<-log(CRYPTIC.std$IndegreeMPA+1)
-CRYPTIC.std$log_InflowNeiBR<-log(CRYPTIC.std$InflowNei+1)
-CRYPTIC.std$log_CorridorIndegreeBR <-log(CRYPTIC.std$CorridorIndegree+1)
-CRYPTIC.std$log_btwdegree <-log(CRYPTIC.std$btwdegree+1)
-CRYPTIC.std$log_outdegree <-log(CRYPTIC.std$Outdegree+1)
-CRYPTIC.std$Class <- relevel(CRYPTIC.std$Class, ref="Fished")
-CRYPTIC.std$Netflow<- CRYPTIC$Netflow
+# add biomass and richness
 CRYPTIC.std$log_biomassarea <- CRYPTIC$log_biomassarea
-CRYPTIC.std$log_grav_total <- CRYPTIC$log_grav_total
-CRYPTIC.std$log_grav_neiBR  <- CRYPTIC$log_grav_neiBR
-head(CRYPTIC.std)
-dim(CRYPTIC.std)
-summary(CRYPTIC.std)
+CRYPTIC.std$Richness <- CRYPTIC$Richness
 
 # Resident
 RESID %>% rm()
@@ -215,31 +187,18 @@ RESID <- all.data %>% filter(Larval_behaviour == "active" & ModelMode == "resid1
 RESID$Class <- relevel(RESID$Class, ref="Fished")
 summary(RESID)
 
-## standrdize x variables
+## standardize x variables
 rm(RESID.std)
-RESID.std<-data.frame(apply(X = RESID[,c(5,6,12:18,19:23)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
-#RESID.std<-data.frame(apply(X = RESID[,c(5,6,14:17,19:28)], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+RESID.std<-data.frame(apply(X = RESID[,c("temp","Age_of_pro","prod.annual",
+                                             "Netflow","log_grav_total","log_grav_neiBR",
+                                             "log_btwdegree","log_SelfR","log_CorridorIn",  
+                                             "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+
+# add management and region
 RESID.std <- cbind(RESID$region,RESID.std)
 RESID.std <- cbind(RESID$Class,RESID.std)
-
 colnames(RESID.std)[c(1,2)] <- c("Class","region")
-names(RESID.std)# add log biomass
 
-RESID.std$log_InflowBR<-log(RESID.std$Inflow+1)
-RESID.std$log_IndegreeBR<-log(RESID.std$Indegree+1)
-RESID.std$log_SelfR<-log(RESID.std$SelfR+1)
-RESID.std$log_InflowMPABR<-log(RESID.std$InflowMPA+1)
-RESID.std$log_IndegreeMPABR<-log(RESID.std$IndegreeMPA+1)
-RESID.std$log_InflowNeiBR<-log(RESID.std$InflowNei+1)
-RESID.std$log_CorridorIndegreeBR <-log(RESID.std$CorridorIndegree+1)
-RESID.std$log_btwdegree <-log(RESID.std$btwdegree+1)
-RESID.std$log_outdegree <-log(RESID.std$Outdegree+1)
-RESID.std$Class <- relevel(RESID.std$Class, ref="Fished")
-RESID.std$Netflow<- RESID$Netflow
+# add biomass and richness
 RESID.std$log_biomassarea <- RESID$log_biomassarea
-RESID.std$log_grav_total <- RESID$log_grav_total
-RESID.std$log_grav_neiBR  <- RESID$log_grav_neiBR
-head(RESID.std)
-dim(RESID.std)
-summary(RESID.std)
-
+RESID.std$Richness <- RESID$Richness
