@@ -15,12 +15,12 @@
 #remotes::install_github("stan-dev/rstan", ref = "develop", subdir = "rstan/rstan", build_opts = "")
  
 # stan
-#remove.packages("rstan")
-#if (file.exists(".RData")) file.remove(".RData")
+remove.packages("rstan")
+if (file.exists(".RData")) file.remove(".RData")
 
-#Sys.setenv(MAKEFLAGS = "-j4") # four cores used
-#install.packages(c("Rcpp", "RcppEigen", "RcppParallel", "StanHeaders"), type = "source")
-#install.packages("rstan", type = "source")
+Sys.setenv(MAKEFLAGS = "-j10") # four cores used
+install.packages(c("Rcpp", "RcppEigen", "RcppParallel", "StanHeaders"), type = "source")
+install.packages("rstan", type = "source")
 
 # packages
 require(dplyr)
@@ -183,11 +183,11 @@ posterior.TRANSIENT.tot <- as.array(all_fit_brms.tot.TRANSIENT.intr.extr)
 #posterior.TRANSIENT.simp <- as.array(all_fit_brms.simp.TRANSIENT)
 
 # RESID
-all_fit_brms.tot.RESID.intr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                      prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.RESID.intr,"all_fit_brms.tot.RESID.intr.Rds")
+#all_fit_brms.tot.RESID.intr %>% rm()  # Full - connectivity through both S and B
+#all_fit_brms.tot.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_inflow.intr + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
+#                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                                      prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.tot.RESID.intr,"all_fit_brms.tot.RESID.intr.Rds")
 
 
 all_fit_brms.tot.RESID.intr.extr %>% rm()  # Full - connectivity through both S and B
@@ -196,19 +196,19 @@ all_fit_brms.tot.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_i
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 saveRDS(all_fit_brms.tot.RESID.intr.extr,"all_fit_brms.tot.RESID.intr.extr.Rds")
 
-all_fit_brms.tot.RESID.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.RESID.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.RESID.intr.extr.simp,"all_fit_brms.tot.RESID.intr.extr.simp.Rds")
+#all_fit_brms.tot.RESID.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
+#all_fit_brms.tot.RESID.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp + biom_mod_inflow.intr.extr.simp + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
+#                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.tot.RESID.intr.extr.simp,"all_fit_brms.tot.RESID.intr.extr.simp.Rds")
 
 
 #RESID species mediated
-all_fit_brms.nocon.S.RESID.intr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.RESID.intr,"all_fit_brms.nocon.S.RESID.intr.Rds")
+#all_fit_brms.nocon.S.RESID.intr %>% rm() # connectivity only through S + ENV
+#all_fit_brms.nocon.S.RESID.intr <-brm(species_mod_inflow.intr + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
+#                                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+#                                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+#saveRDS(all_fit_brms.nocon.S.RESID.intr,"all_fit_brms.nocon.S.RESID.intr.Rds")
 
 all_fit_brms.nocon.S.RESID.intr.extr %>% rm() # connectivity only through S + ENV
 all_fit_brms.nocon.S.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
@@ -224,36 +224,36 @@ all_fit_brms.nocon.RESID <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE
 saveRDS(all_fit_brms.nocon.RESID,"all_fit_brms.nocon.RESID.Rds")
 
 
-RESID.weight <- model_weights(all_fit_brms.tot.RESID.intr,
+RESID.weight <- model_weights(#all_fit_brms.tot.RESID.intr,
                                   all_fit_brms.tot.RESID.intr.extr,
-                                  all_fit_brms.nocon.S.RESID.intr,
+                                  #all_fit_brms.nocon.S.RESID.intr,
                                   all_fit_brms.nocon.S.RESID.intr.extr,
-                                  all_fit_brms.tot.RESID.intr.extr.simp,
+                                  #all_fit_brms.tot.RESID.intr.extr.simp,
                                   all_fit_brms.nocon.RESID,weights = "loo")
 
-RESID.LOO <- LOO(all_fit_brms.tot.RESID.intr,
+RESID.LOO <- LOO(#all_fit_brms.tot.RESID.intr,
                      all_fit_brms.tot.RESID.intr.extr,
-                     all_fit_brms.nocon.S.RESID.intr,
+                     #all_fit_brms.nocon.S.RESID.intr,
                      all_fit_brms.nocon.S.RESID.intr.extr,
-                     all_fit_brms.tot.RESID.intr.extr.simp,
+                     #all_fit_brms.tot.RESID.intr.extr.simp,
                      all_fit_brms.nocon.RESID)
-WAIC(all_fit_brms.tot.RESID.intr,
+WAIC(#all_fit_brms.tot.RESID.intr,
      all_fit_brms.tot.RESID.intr.extr,
-     all_fit_brms.nocon.S.RESID.intr,
+     #all_fit_brms.nocon.S.RESID.intr,
      all_fit_brms.nocon.S.RESID.intr.extr,
-     all_fit_brms.tot.RESID.intr.extr.simp,
+     #all_fit_brms.tot.RESID.intr.extr.simp,
      all_fit_brms.nocon.RESID)
 
-RESID.R2 <- rbind(bayes_R2(all_fit_brms.tot.RESID.intr),
+RESID.R2 <- rbind(#bayes_R2(all_fit_brms.tot.RESID.intr),
                       bayes_R2(all_fit_brms.tot.RESID.intr.extr),
-                      bayes_R2(all_fit_brms.nocon.S.RESID.intr),
+                      #bayes_R2(all_fit_brms.nocon.S.RESID.intr),
                       bayes_R2(all_fit_brms.nocon.S.RESID.intr.extr),
-                      bayes_R2(all_fit_brms.tot.RESID.intr.extr.simp),
+                      #bayes_R2(all_fit_brms.tot.RESID.intr.extr.simp),
                       bayes_R2(all_fit_brms.nocon.RESID))
 
-mcmc_plot(all_fit_brms.tot.RESID.intr)
+#mcmc_plot(all_fit_brms.tot.RESID.intr)
 mcmc_plot(all_fit_brms.tot.RESID.intr.extr)
-mcmc_plot(all_fit_brms.nocon.S.RESID.intr)
+#mcmc_plot(all_fit_brms.nocon.S.RESID.intr)
 mcmc_plot(all_fit_brms.nocon.S.RESID.intr.extr)
 mcmc_plot(all_fit_brms.nocon.RESID)
 

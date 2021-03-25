@@ -16,11 +16,14 @@
 #install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 
 # packages
+#install.packages(c("dplyr","here","forcats","corrgram","ggpubr"))
+
 require(dplyr)
 require(here)
 require(forcats)
 library(corrgram) # for corrgram
 library(ggpubr)
+
 
 # load data
 rm(all.data)
@@ -71,7 +74,7 @@ all.data$log_SelfR <- log(all.data$SelfR+1)
 all.data$log_CorridorIn <- log(all.data$CorridorIn+1)
 all.data$log_InflowMPA <- log(all.data$InflowMPA+1)
 all.data$log_InflowNei <- log(all.data$InflowNei+1)
-all.data$log_annual_prod <- log(log(all.data$prod.annual+1))
+all.data$log_annual_prod <- log(all.data$prod.annual+1)
 
 # save all.data file
 saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
@@ -202,3 +205,4 @@ colnames(RESID.std)[c(1,2)] <- c("Class","region")
 # add biomass and richness
 RESID.std$log_biomassarea <- RESID$log_biomassarea
 RESID.std$Richness <- RESID$Richness
+
