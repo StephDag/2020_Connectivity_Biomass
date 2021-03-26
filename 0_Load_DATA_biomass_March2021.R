@@ -74,6 +74,7 @@ all.data$log_SelfR <- log(all.data$SelfR+1)
 all.data$log_CorridorIn <- log(all.data$CorridorIn+1)
 all.data$log_InflowMPA <- log(all.data$InflowMPA+1)
 all.data$log_InflowNei <- log(all.data$InflowNei+1)
+all.data$log_Inflow <- log(all.data$Inflow+1)
 all.data$log_annual_prod <- log(all.data$prod.annual+1)
 
 # save all.data file
@@ -111,7 +112,7 @@ summary(TRANSIENT)
 rm(TRANSIENT.std)
 TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("temp","Age_of_pro","prod.annual",
                                                  "Netflow","log_grav_total","log_grav_neiBR",
-                                                 "log_btwdegree","log_SelfR","log_CorridorIn",  
+                                                 "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
                                                  "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 # add management and region
 TRANSIENT.std <- cbind(TRANSIENT$region,TRANSIENT.std)
@@ -145,9 +146,9 @@ summary(PARENTAL)
 ## standardize x variables
 rm(PARENTAL.std)
 PARENTAL.std<-data.frame(apply(X = PARENTAL[,c("temp","Age_of_pro","prod.annual",
-                                                "Netflow","log_grav_total","log_grav_neiBR",
-                                                "log_btwdegree","log_SelfR","log_CorridorIn",  
-                                                "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                               "Netflow","log_grav_total","log_grav_neiBR",
+                                               "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
+                                               "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 PARENTAL.std <- cbind(PARENTAL$region,PARENTAL.std)
@@ -169,9 +170,9 @@ summary(CRYPTIC)
 ## standrdize x variables
 rm(CRYPTIC.std)
 CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c("temp","Age_of_pro","prod.annual",
-                                               "Netflow","log_grav_total","log_grav_neiBR",
-                                               "log_btwdegree","log_SelfR","log_CorridorIn",  
-                                               "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                             "Netflow","log_grav_total","log_grav_neiBR",
+                                             "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
+                                             "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 CRYPTIC.std <- cbind(CRYPTIC$region,CRYPTIC.std)
@@ -193,9 +194,9 @@ summary(RESID)
 ## standardize x variables
 rm(RESID.std)
 RESID.std<-data.frame(apply(X = RESID[,c("temp","Age_of_pro","prod.annual",
-                                             "Netflow","log_grav_total","log_grav_neiBR",
-                                             "log_btwdegree","log_SelfR","log_CorridorIn",  
-                                             "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                         "Netflow","log_grav_total","log_grav_neiBR",
+                                         "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
+                                         "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 RESID.std <- cbind(RESID$region,RESID.std)
