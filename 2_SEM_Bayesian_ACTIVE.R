@@ -28,6 +28,8 @@ require(here)
 require(forcats)
 require(brms)
 require(rstan)
+require(Rserve)
+require(rJava)
 
 # load data
 #rm(all.data)
