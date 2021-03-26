@@ -87,14 +87,14 @@ connectivity <- all.data[,c("SelfR","Inflow","Indegree",
 corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
                               upper.panel=panel.cor, text.panel=panel.txt)
 
-ggexport(corr.connectivity,filename=here("_prelim.figures","Correlations","Corr_connectivity.pdf"),width=20,height=12)
+#ggexport(corr.connectivity,filename=here("_prelim.figures","Correlations","Corr_connectivity.pdf"),width=20,height=12)
 
 # correlation between environmental + human attributes
 env_human <- all.data[,c("log_grav_total","log_grav_neiBR","temp","prod.annual","Age_of_pro")] 
 corr.env_human <- corrgram(env_human,order=TRUE, lower.panel=panel.shade,
                               upper.panel=panel.cor, text.panel=panel.txt)
 
-ggexport(corr.env_human,filename=here("_prelim.figures","Correlations","Corr_env_human.pdf"),width=20,height=12)
+#ggexport(corr.env_human,filename=here("_prelim.figures","Correlations","Corr_env_human.pdf"),width=20,height=12)
 
 ggplot(all.data,aes(x=log_grav_total,y=log_grav_neiBR)) +
   geom_point() +
