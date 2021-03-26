@@ -803,14 +803,15 @@ pred.TRANSIENT <- expand.grid(Netflow=c(-1, 0, 1),log_grav_total=c(min(TRANSIENT
                     prod.annual = mean(TRANSIENT.std$prod.annual))
 
 pred.TRANSIENT$log_biomassarea <- predict(TRANSIENT.full,pred.TRANSIENT)
-pred.TRANSIENT$Netflow <- as.factor(pred$Netflow)
-
+pred.TRANSIENT$Netflow <- as.factor(as.character(pred$Netflow))
+str(pred.TRANSIENT)
+summary(pred.TRANSIENT)
 # carefull, biomass is an array
 # Species richness
 three.way.Richness <- ggplot(TRANSIENT.std,aes(x=log_grav_total,y=Richness,color=Netflow))+
   geom_point() +
   facet_grid(~Class) +
-  geom_line(data=pred,aes(y=log_biomassarea[,,1][,1],x=log_grav_total,group=Netflow))
+  geom_line(data=pred,aes(y=log_biomassarea[,,1][,1],x=log_grav_total,group=3))
 three.way.Richness  
 
 # biomass
@@ -835,6 +836,7 @@ three.way.Biomass <- ggplot(TRANSIENT.std,aes(x=log_grav_total,y=log_biomassarea
   geom_line(data=pred,aes(y=log_biomassarea[,,2][,1],x=log_grav_total,group=Netflow))
 three.way.Biomass  
 
+str(pred)
 
 geom_text(label, size = 6, colour = "white")
 ?geom_line
