@@ -358,11 +358,13 @@ all_fit_brms.nocon.S.CRYPTIC.intr.extr %>% rm() # connectivity only through S + 
 all_fit_brms.nocon.S.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_nocon.S + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-#
+saveRDS(all_fit_brms.nocon.S.CRYPTIC.intr.extr,"all_fit_brms.nocon.S.CRYPTIC.intr.extr.Rds")
+
 all_fit_brms.nocon.CRYPTIC %>% rm() # no connectivity for S and B, only environment
 all_fit_brms.nocon.CRYPTIC <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
                                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                    prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(all_fit_brms.nocon.CRYPTIC,"all_fit_brms.nocon.CRYPTIC.Rds")
 
 
 CRYPTIC.weight <- model_weights(#all_fit_brms.tot.CRYPTIC.intr,
