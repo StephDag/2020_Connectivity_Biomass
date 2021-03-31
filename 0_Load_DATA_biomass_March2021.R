@@ -76,6 +76,9 @@ all.data$log_InflowMPA <- log(all.data$InflowMPA+1)
 all.data$log_InflowNei <- log(all.data$InflowNei+1)
 all.data$log_Inflow <- log(all.data$Inflow+1)
 all.data$log_annual_prod <- log(all.data$prod.annual+1)
+all.data$log_Indegree <- log(all.data$Indegree+1)
+all.data$log_Indegree_MPA <- log(all.data$IndegreeMP+1)
+all.data$log_Indegree_Neigh <- log(all.data$IndegreeNe+1)
 
 # save all.data file
 saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
@@ -110,10 +113,10 @@ summary(TRANSIENT)
 
 ## standrdize x variables
 rm(TRANSIENT.std)
-TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("temp","Age_of_pro","prod.annual",
+TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("Richness","temp","Age_of_pro","prod.annual",
                                                  "Netflow","log_grav_total","log_grav_neiBR",
                                                  "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                                 "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                                 "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 # add management and region
 TRANSIENT.std <- cbind(TRANSIENT$region,TRANSIENT.std)
 TRANSIENT.std <- cbind(TRANSIENT$Class,TRANSIENT.std)
@@ -121,8 +124,7 @@ colnames(TRANSIENT.std)[c(1,2)] <- c("Class","region")
 
 # add biomass and richness
 TRANSIENT.std$log_biomassarea <- TRANSIENT$log_biomassarea
-TRANSIENT.std$Richness <- TRANSIENT$Richness
-
+#TRANSIENT.std$Richness <- TRANSIENT$Richness
 
 ggplot(TRANSIENT.std,aes(x=log_InflowNei,y=log_biomassarea)) +
   geom_point() +
@@ -145,10 +147,10 @@ summary(PARENTAL)
 
 ## standardize x variables
 rm(PARENTAL.std)
-PARENTAL.std<-data.frame(apply(X = PARENTAL[,c("temp","Age_of_pro","prod.annual",
+PARENTAL.std<-data.frame(apply(X = PARENTAL[,c("Richness","temp","Age_of_pro","prod.annual",
                                                "Netflow","log_grav_total","log_grav_neiBR",
                                                "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                               "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                               "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh"))], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 PARENTAL.std <- cbind(PARENTAL$region,PARENTAL.std)
@@ -157,7 +159,7 @@ colnames(PARENTAL.std)[c(1,2)] <- c("Class","region")
 
 # add biomass and richness
 PARENTAL.std$log_biomassarea <- PARENTAL$log_biomassarea
-PARENTAL.std$Richness <- PARENTAL$Richness
+#PARENTAL.std$Richness <- PARENTAL$Richness
 
 # Cryptic
 CRYPTIC %>% rm()
@@ -169,10 +171,10 @@ summary(CRYPTIC)
 
 ## standrdize x variables
 rm(CRYPTIC.std)
-CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c("temp","Age_of_pro","prod.annual",
+CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c("Richness","temp","Age_of_pro","prod.annual",
                                              "Netflow","log_grav_total","log_grav_neiBR",
                                              "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                             "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                             "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh"))], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 CRYPTIC.std <- cbind(CRYPTIC$region,CRYPTIC.std)
@@ -181,7 +183,7 @@ colnames(CRYPTIC.std)[c(1,2)] <- c("Class","region")
 
 # add biomass and richness
 CRYPTIC.std$log_biomassarea <- CRYPTIC$log_biomassarea
-CRYPTIC.std$Richness <- CRYPTIC$Richness
+#CRYPTIC.std$Richness <- CRYPTIC$Richness
 
 # Resident
 RESID %>% rm()
@@ -193,10 +195,10 @@ summary(RESID)
 
 ## standardize x variables
 rm(RESID.std)
-RESID.std<-data.frame(apply(X = RESID[,c("temp","Age_of_pro","prod.annual",
+RESID.std<-data.frame(apply(X = RESID[,c("Richness","temp","Age_of_pro","prod.annual",
                                          "Netflow","log_grav_total","log_grav_neiBR",
                                          "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                         "log_InflowMPA","log_InflowNei")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                         "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh"))], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 RESID.std <- cbind(RESID$region,RESID.std)
@@ -205,5 +207,5 @@ colnames(RESID.std)[c(1,2)] <- c("Class","region")
 
 # add biomass and richness
 RESID.std$log_biomassarea <- RESID$log_biomassarea
-RESID.std$Richness <- RESID$Richness
+#RESID.std$Richness <- RESID$Richness
 
