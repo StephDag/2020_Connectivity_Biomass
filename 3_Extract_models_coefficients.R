@@ -311,7 +311,7 @@ SEM_inflow_tot <- ggarrange(Richness_inflow_TRANSIENT_tot,Richness_inflow_RESIDE
 ggsave(here("_prelim.figures","SEM_bayes_inflow_coef_total_FE.pdf"),SEM_inflow_tot,width=30,height=15)
 
 # weights for each model
-TRANSIENT.weight <- model_weights(TRANSIENT.full,#TRANSIENT.SIMP,
+TRANSIENT.weight <- model_weights(TRANSIENT.full,TRANSIENT.SIMP,
                                   TRANSIENT.S.con,
                                   TRANSIENT.no.con,weights = "loo")
 RESIDENT.weight <- model_weights(RESIDENT.full,#RESIDENT.SIMP,
@@ -334,7 +334,7 @@ SEM_inflow_tot_weight.table <- SEM_inflow_tot_weight  %>%
   save_kable("_prelim.figures/SEM_bayes_inflow_weight_FE.png")
 
 # R2
-TRANSIENT.R2 <- rbind(bayes_R2(TRANSIENT.full),#bayes_R2(TRANSIENT.SIMP),
+TRANSIENT.R2 <- rbind(bayes_R2(TRANSIENT.full),bayes_R2(TRANSIENT.SIMP),
                       bayes_R2(TRANSIENT.S.con),bayes_R2(TRANSIENT.no.con))
 RESIDENT.R2 <- rbind(bayes_R2(RESIDENT.full),bayes_R2(RESIDENT.S.con),bayes_R2(RESIDENT.no.con))
 PARENTAL.R2 <- rbind(bayes_R2(PARENTAL.full),bayes_R2(PARENTAL.S.con),bayes_R2(PARENTAL.no.con))
