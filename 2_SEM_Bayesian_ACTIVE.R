@@ -62,30 +62,30 @@ require(rJava)
 
 #### SPECIES RICHNESS = Environment + Connectivity
 rm(species_mod_inflow.intr.extr) # ENV + CON
-species_mod_inflow.intr.extr <- bf(Richness ~ temp + log_btwdegree + log_CorridorIn + log_InflowMPA + log_InflowNei + Netflow + prod.annual + Class*log_grav_total + 
-                                       (1+  temp + log_btwdegree + log_CorridorIn + log_InflowMPA + log_InflowNei + Netflow +prod.annual +log_grav_total |region))
+species_mod_inflow.intr.extr <- bf(Richness ~ temp + log_btwdegree + log_CorridorIn + log_InflowMPA + log_InflowNei + Netflow + prod.annual + Class + 
+                                       (1+  temp + log_btwdegree + log_CorridorIn + log_InflowMPA + log_InflowNei + Netflow +prod.annual  |region))
 
 #### SPECIES RICHNESS = Environment + Connectivity simplified for TRANSIENT
 rm(species_mod_inflow.intr.extr.simp.transient) # ENV + CON simplified
-species_mod_inflow.intr.extr.simp.transient <- bf(Richness ~log_CorridorIn + prod.annual + Class*log_grav_total + 
-                                          (1+ log_CorridorIn + prod.annual +log_grav_total |region))
+species_mod_inflow.intr.extr.simp.transient <- bf(Richness ~log_CorridorIn + prod.annual + Class + 
+                                          (1+ log_CorridorIn + prod.annual |region))
 
 #### SPECIES RICHNESS = Environment + Connectivity simplified for RESIDENT
 rm(species_mod_inflow.intr.extr.simp.resident) # ENV + CON simplified
-species_mod_inflow.intr.extr.simp.resident <- bf(Richness ~ log_CorridorIn +  Netflow + prod.annual + Class*log_grav_total + 
-                                                   (1+ log_CorridorIn +  Netflow +prod.annual +log_grav_total |region))
+species_mod_inflow.intr.extr.simp.resident <- bf(Richness ~ log_CorridorIn +  Netflow + prod.annual + Class + 
+                                                   (1+ log_CorridorIn +  Netflow +prod.annual  |region))
 
 rm(species_mod_inflow.intr.extr.simp.parental) # ENV + CON simplified for PARENTAL
-species_mod_inflow.intr.extr.simp.parental <- bf(Richness ~ log_InflowNei + prod.annual + Class*log_grav_total + 
-                                                   (1+ log_InflowNei + prod.annual +log_grav_total |region))
+species_mod_inflow.intr.extr.simp.parental <- bf(Richness ~ log_InflowNei + prod.annual + Class + 
+                                                   (1+ log_InflowNei + prod.annual |region))
 
 rm(species_mod_inflow.intr.extr.simp.cryptic) # ENV + CON simplified for CRYPTIC
-species_mod_inflow.intr.extr.simp.cryptic <- bf(Richness ~ log_CorridorIn +  prod.annual + Class*log_grav_total + 
-                                                   (1+ log_CorridorIn + prod.annual +log_grav_total |region))
+species_mod_inflow.intr.extr.simp.cryptic <- bf(Richness ~ log_CorridorIn +  prod.annual + Class + 
+                                                   (1+ log_CorridorIn + prod.annual  |region))
 
 #### SPECIES RICHNESS = Environment
 rm(S_mod_nocon) # ENV
-S_mod_nocon <- bf(Richness ~ temp +  prod.annual + Class + log_grav_total + (1 +  temp + prod.annual +log_grav_total |region))
+S_mod_nocon <- bf(Richness ~ temp +  prod.annual + Class  + (1 +  temp + prod.annual  |region))
                   
 #### BIOMASS = Environment + Connectivity
 rm(biom_mod_inflow.intr.extr) # ENV + CON
