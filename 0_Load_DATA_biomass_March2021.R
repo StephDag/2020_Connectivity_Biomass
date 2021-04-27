@@ -5,7 +5,7 @@
 
 #if (!requireNamespace("remotes")) {
 #  install.packages("remotes")
-#}
+#
 #install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 #remotes::install_github("stan-dev/rstan", ref = "develop", subdir = "rstan/rstan", build_opts = "")
 
@@ -15,7 +15,7 @@
 #pkgbuild::has_build_tools(debug = TRUE)
 #install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 
-# packages
+# packagesa
 #install.packages(c("dplyr","here","forcats","corrgram","ggpubr"))
 
 require(dplyr)
@@ -79,6 +79,8 @@ all.data$log_annual_prod <- log(all.data$prod.annual+1)
 all.data$log_Indegree <- log(all.data$Indegree+1)
 all.data$log_Indegree_MPA <- log(all.data$IndegreeMP+1)
 all.data$log_Indegree_Neigh <- log(all.data$IndegreeNe+1)
+all.data$log_Outdegree <- log(all.data$Outdegree+1)
+all.data$log_Outflow <- log(all.data$OutFlow+1)
 
 # save all.data file
 #saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
@@ -116,7 +118,7 @@ rm(TRANSIENT.std)
 TRANSIENT.std<-data.frame(apply(X = TRANSIENT[,c("Richness","temp","Age_of_pro","prod.annual",
                                                  "Netflow","log_grav_total","log_grav_neiBR",
                                                  "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                                 "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                                 "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh","log_Outdegree","log_Outflow")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 # add management and region
 TRANSIENT.std <- cbind(TRANSIENT$region,TRANSIENT.std)
 TRANSIENT.std <- cbind(TRANSIENT$Class,TRANSIENT.std)
@@ -150,7 +152,7 @@ rm(PARENTAL.std)
 PARENTAL.std<-data.frame(apply(X = PARENTAL[,c("Richness","temp","Age_of_pro","prod.annual",
                                                "Netflow","log_grav_total","log_grav_neiBR",
                                                "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                               "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                               "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh","log_Outdegree","log_Outflow")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 PARENTAL.std <- cbind(PARENTAL$region,PARENTAL.std)
@@ -174,7 +176,7 @@ rm(CRYPTIC.std)
 CRYPTIC.std<-data.frame(apply(X = CRYPTIC[,c("Richness","temp","Age_of_pro","prod.annual",
                                              "Netflow","log_grav_total","log_grav_neiBR",
                                              "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                             "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                             "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh","log_Outdegree","log_Outflow")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 CRYPTIC.std <- cbind(CRYPTIC$region,CRYPTIC.std)
@@ -198,7 +200,7 @@ rm(RESID.std)
 RESID.std<-data.frame(apply(X = RESID[,c("Richness","temp","Age_of_pro","prod.annual",
                                          "Netflow","log_grav_total","log_grav_neiBR",
                                          "log_btwdegree","log_SelfR","log_CorridorIn","log_Inflow",  
-                                         "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
+                                         "log_InflowMPA","log_InflowNei","log_Indegree","log_Indegree_MPA","log_Indegree_Neigh","log_Outdegree","log_Outflow")], MARGIN = 2,FUN = function(x){(x - mean(x,na.rm=T)) / (1*sd(x,na.rm=T))}))
 
 # add management and region
 RESID.std <- cbind(RESID$region,RESID.std)

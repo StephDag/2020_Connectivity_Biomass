@@ -53,7 +53,7 @@ library(dplyr)
 
 PARAM.richness <- c("Intercept","Richness","Temperature","Betweeness Centr.",
                     "Corridor Indegree","Inflow MPA","Inflow Neighb.","Netflow",
-                    "Productivity","No-Take","Restricted gears","Tot.Gravity")
+                    "Productivity","No-Take","Restricted gears")
 
 PARAM.biomass <- c("Intercept","Temperature","Richness","Self Recruit.","Gravity Neighb.",
                    "Inflow MPA","Inflow Neighb.","Productivity","Tot.Gravity",
@@ -64,7 +64,7 @@ PARAM.biomass <- c("Intercept","Temperature","Richness","Self Recruit.","Gravity
 
 CAT.richness <- c("Intercept","Richness","Human/Env.","Intrinsic Connect.",
                   "Intrinsic Connect.","Extrinsic Connect.","Extrinsic Connect.",
-                  "Intrinsic Connect.","Human/Env.","Human/Env.","Human/Env.","Human/Env.")
+                  "Intrinsic Connect.","Human/Env.","Human/Env.","Human/Env.")
 
 CAT.biomass <- c("Intercept","Human/Env.","Richness","Intrinsic Connect.","Extrinsic Connect.", 
                  "Extrinsic Connect.", "Extrinsic Connect.", "Human/Env.","Human/Env.",
@@ -77,7 +77,6 @@ DesiredOrder.richness <- c("Intercept",
                           "Richness",
                           "Temperature",
                           "Productivity",
-                          "Tot.Gravity",
                           "No-Take",
                           "Restricted gears",
                           "Netflow","Betweeness Centr.",
@@ -139,10 +138,11 @@ rm(two_models)
 
 # RESIDENT
 RESIDENT.full <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.RESID.intr.extr_1.Rds"))
-#RESIDENT.SIMP <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.RESID.intr.extr.simp_1.Rds"))
+RESIDENT.SIMP <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.RESID.intr.extr.simp_1.Rds"))
 RESIDENT.S.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.S.RESID.intr.extr_1.Rds"))
 RESIDENT.no.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.RESID_1.Rds"))
 
+rm(a)
 a <- mcmc_intervals(RESIDENT.full)
 rich.var <- as.data.frame(a$data)[grep("b_Richness",as.data.frame(a$data)[,"parameter"]),"parameter"]
 biom.var <- as.data.frame(a$data)[grep("b_logbiomassarea",as.data.frame(a$data)[,"parameter"]),"parameter"]
@@ -193,7 +193,7 @@ rm(two_models)
 
 # PARENTAL
 PARENTAL.full <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.PARENTAL.intr.extr_1.Rds"))
-#PARENTAL.SIMP <- readRDS("all_fit_brms.tot.PARENTAL.intr.extr.simp.Rds")
+PARENTAL.SIMP <- readRDS("all_fit_brms.tot.PARENTAL.intr.extr.simp.Rds")
 PARENTAL.S.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.S.PARENTAL.intr.extr_1.Rds"))
 PARENTAL.no.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.PARENTAL_1.Rds"))
 
@@ -247,7 +247,7 @@ Parental.SEM  # The trick to these is position_dodge()
 rm(two_models)
 # CRYPTIC
 CRYPTIC.full <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.CRYPTIC.intr.extr_1.Rds"))
-#CRYPTIC.SIMP<- readRDS("all_fit_brms.tot.CRYPTIC.intr.extr.simp.Rds")
+CRYPTIC.SIMP<- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.tot.CRYPTIC.intr.extr.simp.Rds"))
 CRYPTIC.S.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.S.CRYPTIC.intr.extr_1.Rds"))
 CRYPTIC.no.con <- readRDS(here::here("ACTIVE_models","InflowMPA","all_fit_brms.nocon.CRYPTIC_1.Rds"))
 
@@ -311,14 +311,16 @@ SEM_inflow_tot <- ggarrange(Richness_inflow_TRANSIENT_tot,Richness_inflow_RESIDE
 ggsave(here("_prelim.figures","SEM_bayes_inflow_coef_total_FE.pdf"),SEM_inflow_tot,width=30,height=15)
 
 # weights for each model
-TRANSIENT.weight <- model_weights(TRANSIENT.full,TRANSIENT.SIMP,
-                                  TRANSIENT.S.con,
+TRANSIENT.weight <- model_weights(TRANSIENT.full,#TRANSIENT.SIMP,
+                                  #TRANSIENT.S.con,
                                   TRANSIENT.no.con,weights = "loo")
 RESIDENT.weight <- model_weights(RESIDENT.full,#RESIDENT.SIMP,
                                  RESIDENT.S.con,RESIDENT.no.con,weights = "loo")
-PARENTAL.weight <- model_weights(PARENTAL.full,PARENTAL.S.con,
+PARENTAL.weight <- model_weights(PARENTAL.full,#PARENTAL.SIMP,
+                                 #PARENTAL.S.con,
                                  PARENTAL.no.con,weights = "loo")
-CRYPTIC.weight <- model_weights(CRYPTIC.full,CRYPTIC.S.con,
+CRYPTIC.weight <- model_weights(CRYPTIC.full,#CRYPTIC.SIMP,
+                                CRYPTIC.S.con,
                                 CRYPTIC.no.con,weights = "loo")
 
 
@@ -334,7 +336,7 @@ SEM_inflow_tot_weight.table <- SEM_inflow_tot_weight  %>%
   save_kable("_prelim.figures/SEM_bayes_inflow_weight_FE.png")
 
 # R2
-TRANSIENT.R2 <- rbind(bayes_R2(TRANSIENT.full),bayes_R2(TRANSIENT.SIMP),
+TRANSIENT.R2 <- rbind(bayes_R2(TRANSIENT.full),#bayes_R2(TRANSIENT.SIMP),
                       bayes_R2(TRANSIENT.S.con),bayes_R2(TRANSIENT.no.con))
 RESIDENT.R2 <- rbind(bayes_R2(RESIDENT.full),bayes_R2(RESIDENT.S.con),bayes_R2(RESIDENT.no.con))
 PARENTAL.R2 <- rbind(bayes_R2(PARENTAL.full),bayes_R2(PARENTAL.S.con),bayes_R2(PARENTAL.no.con))
@@ -364,6 +366,7 @@ ggsave(here("_prelim.figures","SEM_bayes_coef_total_FE.pdf"),SEM_coef_tot,width=
 #### two plots 1) Richness 2) Biomass
 
 # richness data.frame
+rm(four_FE_Richness )
 four_FE_Richness <- rbind(m1_df_transient,m1_df_resident,m1_df_parental,m1_df_cryptic)
 four_FE_Richness$FE <- as.factor(four_FE_Richness$FE)
 four_FE_Richness$CAT <- as.factor(four_FE_Richness$CAT)
@@ -815,11 +818,17 @@ plot(conditional_effects(TRANSIENT.full, effects = "log_grav_total:Class:Netflow
 # cryptic
 plot(conditional_effects(CRYPTIC.full))
 conditions <- data.frame(Netflow = c(-1, 0, 1))
-# conditions <- data.frame(Netflow = c(-0.53, 0.12, 0.77))
-plot(conditional_effects(TRANSIENT.full, effects = "log_grav_total:Class:Netflow",conditions=conditions))
+conditions <- data.frame(Netflow = c(-1, 0, 0.77))
+plot(conditional_effects(CRYPTIC.full, effects = "log_grav_total:Class:Netflow",conditions=conditions))
 
 conditions <- make_conditions(TRANSIENT.full, "Class")
 conditional_effects(TRANSIENT.full, "log_grav_total:Netflow", conditions = conditions)
+
+conditions <- make_conditions(CRYPTIC.full, "Netflow")
+conditional_effects(CRYPTIC.full, "log_grav_total:Class", conditions = conditions)
+
+conditions <- make_conditions(TRANSIENT.full, "Netflow")
+conditional_effects(TRANSIENT.full, "log_grav_total:Class", conditions = conditions)
 
 # cryptic
 conditions <- make_conditions(CRYPTIC.full, "Class")

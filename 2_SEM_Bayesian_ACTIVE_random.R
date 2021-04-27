@@ -59,181 +59,413 @@ require(rJava)
   # rm inflow from neighbour in the simplified model
   # rm productivity (the 50% interval crosses the 0 line for all functional group)
 
-
 #### SPECIES RICHNESS = Environment + Connectivity
-rm(species_mod_inflow.intr.extr) # ENV + CON
-species_mod_inflow.intr.extr <- bf(Richness ~ temp + log_btwdegree + log_CorridorIn + log_InflowMPA + log_InflowNei + Netflow + prod.annual + Class + 
-                                       (1 |region))
+rm(MOD_1_S_null) # ENV + CON
+MOD_1_S_null <- bf(Richness ~ 1 + (1 |region))
 
-#### SPECIES RICHNESS = Environment + Connectivity simplified for TRANSIENT
-rm(species_mod_inflow.intr.extr.simp.transient) # ENV + CON simplified
-species_mod_inflow.intr.extr.simp.transient <- bf(Richness ~log_CorridorIn + prod.annual + Class + 
-                                          (1 |region))
+# models with connectivity
+rm(MOD_1_S) # ENV + CON
+MOD_1_S <- bf(Richness ~ temp + prod.annual + 
+                log_btwdegree + log_CorridorIn + 
+                log_InflowMPA + log_InflowNei + Netflow + 
+                log_grav_total + Class + (1 + temp + prod.annual + 
+                                            log_btwdegree + log_CorridorIn + 
+                                            log_InflowMPA + log_InflowNei + Netflow + 
+                                            log_grav_total  |region))
 
-#### SPECIES RICHNESS = Environment + Connectivity simplified for RESIDENT
-rm(species_mod_inflow.intr.extr.simp.resident) # ENV + CON simplified
-species_mod_inflow.intr.extr.simp.resident <- bf(Richness ~ log_CorridorIn +  Netflow + prod.annual + Class + 
-                                                   (1 |region))
+rm(MOD_2_S) # ENV + CON
+MOD_2_S <- bf(Richness ~ temp + prod.annual + 
+                log_btwdegree + log_Outflow + 
+                log_Inflow + log_Indegree_Neigh + 
+                log_grav_total + Class + (1 + temp + prod.annual + 
+                                            log_btwdegree + log_Outflow + 
+                                            log_Inflow + log_Indegree_Neigh + 
+                                            log_grav_total |region))
 
-rm(species_mod_inflow.intr.extr.simp.parental) # ENV + CON simplified for PARENTAL
-species_mod_inflow.intr.extr.simp.parental <- bf(Richness ~ log_InflowNei + prod.annual + Class + 
-                                                   (1 |region))
+rm(MOD_3_S) # ENV + CON
+MOD_3_S <- bf(Richness ~ temp + prod.annual + log_Outdegree + 
+                log_btwdegree +
+                log_InflowNei + log_Indegree_MPA + 
+                log_grav_total + Class + (1 + temp + prod.annual + log_Outdegree + 
+                                            log_btwdegree +
+                                            log_InflowNei + log_Indegree_MPA + 
+                                            log_grav_total |region))
 
-rm(species_mod_inflow.intr.extr.simp.cryptic) # ENV + CON simplified for CRYPTIC
-species_mod_inflow.intr.extr.simp.cryptic <- bf(Richness ~ log_CorridorIn +  prod.annual + Class + 
-                                                   (1 |region))
+rm(MOD_4_S) # ENV + CON
+MOD_4_S <- bf(Richness ~ temp + prod.annual + log_SelfR + 
+                log_btwdegree + log_Indegree + Netflow + 
+                log_grav_total + Class + 
+                (1 + temp + prod.annual + log_SelfR + 
+                   log_btwdegree + log_Indegree + Netflow + 
+                   log_grav_total |region))
 
 #### SPECIES RICHNESS = Environment
-rm(S_mod_nocon) # ENV
-S_mod_nocon <- bf(Richness ~ temp +  prod.annual + Class  + (1  |region))
+S_mod_nocon <- bf(Richness ~ temp +  prod.annual + Class + log_grav_total + (1 +temp +  prod.annual + Class + log_grav_total |region))
                   
 #### BIOMASS = Environment + Connectivity
-rm(biom_mod_inflow.intr.extr) # ENV + CON
-biom_mod_inflow.intr.extr <- bf(log_biomassarea ~ temp + Richness + log_SelfR + log_grav_neiBR  + 
-                                  log_InflowMPA + log_InflowNei +  prod.annual +  log_grav_total*Netflow*Class +
-                                  (1|region))
+  # null model
+rm(MOD_B.null) # ENV + CON
+MOD_B.null <- bf(log_biomassarea ~ 1 + (1 |region))
 
-#### BIOMASS = Environment + Connectivity simplified
-rm(biom_mod_inflow.intr.extr.simp.transient) # ENV + CON simplified for TRANSIENT
-biom_mod_inflow.intr.extr.simp.transient <- bf(log_biomassarea ~Richness + log_SelfR + 
-                                      log_InflowMPA + log_InflowNei +  prod.annual +  log_grav_total*Netflow*Class +
-                                      (1 |region))
+# full model
+rm(MOD_1_B) # ENV + CON
+MOD_1_B <- bf(log_biomassarea ~ Richness + 
+                                  temp + prod.annual + 
+                                  log_grav_total*Class*Netflow + 
+                                  log_InflowMPA + log_InflowNei + Class + log_SelfR +
+                (1 + log_InflowMPA + log_InflowNei + Richness + 
+                   temp + prod.annual + 
+                   log_grav_total +log_SelfR  |region))
 
-rm(biom_mod_inflow.intr.extr.simp.resident) # ENV + CON simplified for RESIDENT
-biom_mod_inflow.intr.extr.simp.resident <- bf(log_biomassarea ~ temp + Richness +  log_grav_neiBR  + 
-                                                log_InflowMPA +  prod.annual +  log_grav_total*Netflow*Class +
-                                                (1|region))
+rm(MOD_2_B) # ENV + CON
+MOD_2_B <- bf(log_biomassarea ~ Richness + 
+                temp + prod.annual + 
+                log_grav_total*Class*Netflow + 
+                log_SelfR + 
+                log_Indegree + 
+                (1 + Richness + 
+                   temp + prod.annual + 
+                   log_grav_total + Netflow + 
+                   log_SelfR + 
+                   log_Indegree |region))
 
-rm(biom_mod_inflow.intr.extr.simp.parental) # ENV + CON simplified for PARENTAL
-biom_mod_inflow.intr.extr.simp.parental <- bf(log_biomassarea ~ temp + Richness + log_SelfR + log_grav_neiBR  + 
-                                               prod.annual +  log_grav_total*Netflow*Class +
-                                                (1 |region))
+rm(MOD_3_B) # ENV + CON
+MOD_3_B <- bf(log_biomassarea ~ Richness + 
+                temp + prod.annual + 
+                log_grav_total*Class*Netflow + 
+                log_SelfR + 
+                log_Indegree_MPA  + 
+                (1 + Richness + 
+                   temp + prod.annual + 
+                   log_grav_total+Netflow + 
+                   log_SelfR + 
+                   log_Indegree_MPA|region))
 
-rm(biom_mod_inflow.intr.extr.simp.cryptic) # ENV + CON for CRYPTIC
-biom_mod_inflow.intr.extr.simp.cryptic <- bf(log_biomassarea ~ temp + Richness +
-                                  log_InflowMPA +  prod.annual +  log_grav_total*Netflow*Class +
-                                  (1  |region))
+rm(MOD_4_B) # ENV + CON
+MOD_4_B <- bf(log_biomassarea ~ Richness + 
+                temp + prod.annual + 
+                log_grav_total*Class*Netflow + 
+                log_SelfR +  
+                (1 + Richness + 
+                   temp + prod.annual + 
+                   log_grav_total+Netflow + 
+                   log_SelfR |region))
+
+rm(MOD_5_B) # ENV + CON
+MOD_5_B <- bf(log_biomassarea ~ Richness + 
+                temp + prod.annual + 
+                log_grav_total*Class*Netflow + 
+                (1 +Richness + 
+                   temp + prod.annual + 
+                   log_grav_total+Netflow|region))
+#### Biomass = Environment
+B_mod_nocon <- bf(log_biomassarea ~ temp +  prod.annual + Class*log_grav_total + 
+                    (1 + temp +  prod.annual + log_grav_total  |region))
+
+### run species models
+  # null model
+MOD_S_1_run_TRANSIENT_null %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_TRANSIENT_null <-brm(MOD_1_S_null , data=TRANSIENT.std,cores=4,chains = 4,
+                            iter = 5000, warmup = 1000,thin = 2)
+saveRDS(MOD_S_1_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_1_run_TRANSIENT_null.Rds")
+
+# full model
+# null model
+#MOD_S_full_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+#MOD_S_full_run_TRANSIENT <-brm(MOD_full_B , data=TRANSIENT.std,cores=4,chains = 4,
+#                                 iter = 5000, warmup = 1000,thin = 2)
+#saveRDS(MOD_S_full_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_full_run_TRANSIENT.Rds")
+
+  # model 1
+MOD_S_1_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_TRANSIENT <-brm(MOD_1_S , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_1_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_1_run_TRANSIENT.Rds")
+  # model 2
+MOD_S_2_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_S_2_run_TRANSIENT <-brm(MOD_2_S , data=TRANSIENT.std,cores=4,chains = 4,
+                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_2_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_2_run_TRANSIENT.Rds")
+
+# model 3
+MOD_S_3_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_S_3_run_TRANSIENT <-brm(MOD_3_S , data=TRANSIENT.std,cores=4,chains = 4,
+                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_3_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_3_run_TRANSIENT.Rds")
+
+# model 4
+MOD_S_4_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_S_4_run_TRANSIENT <-brm(MOD_4_S , data=TRANSIENT.std,cores=4,chains = 4,
+                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_4_run_TRANSIENT,"ACTIVE_models/Full/MOD_S_4_run_TRANSIENT.Rds")
+
+# model S env
+MOD_S_env %>% rm()  # Full - connectivity through both S and B
+MOD_S_env <-brm(S_mod_nocon , data=TRANSIENT.std,cores=4,chains = 4,
+                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_env,"ACTIVE_models/Full/MOD_S_env.Rds")
+
+#### test all S models
+r2_bayes(MOD_S_1_run_TRANSIENT_null)
+r2_bayes(MOD_S_1_run_TRANSIENT)
+r2_bayes(MOD_S_2_run_TRANSIENT)
+r2_bayes(MOD_S_3_run_TRANSIENT)
+r2_bayes(MOD_S_4_run_TRANSIENT)
+r2_bayes(MOD_S_env)
+
+sort(model_weights(MOD_S_1_run_TRANSIENT_null,MOD_S_1_run_TRANSIENT,
+              MOD_S_2_run_TRANSIENT,MOD_S_3_run_TRANSIENT,
+              MOD_S_4_run_TRANSIENT,MOD_S_env,weights="loo"),decreasing = T)
+
+summary(MOD_S_2_run_TRANSIENT)
+
+plot(MOD_S_4_run_TRANSIENT)
+
+loo(MOD_S_1_run_TRANSIENT_null,MOD_S_1_run_TRANSIENT,MOD_S_2_run_TRANSIENT,
+    MOD_S_3_run_TRANSIENT,MOD_S_4_run_TRANSIENT, MOD_S_env)
+
+### 
+
+fit2 <- update(MOD_BIOM_1_run_TRANSIENT, formula. = . ~  Richness + 
+                 temp + prod.annual + 
+                 log_grav_total*Class*Netflow + 
+                 log_InflowMPA + (1 |region),newdata=TRANSIENT.std)
+
+loo(MOD_BIOM_1_run_TRANSIENT,fit2)
+r2_bayes(MOD_BIOM_1_run_TRANSIENT)
+r2_bayes(fit2)
+summary(MOD_BIOM_1_run_TRANSIENT)
 
 
-rm(biom_mod_nocon.S) # ENV + S
-biom_mod_nocon.S <- bf(log_biomassarea ~ Richness +temp + log_grav_total*Class  +  prod.annual + (1|region))
+#fit3 <- update(MOD_S_1_run_TRANSIENT, formula. = . ~ temp + prod.annual + 
+#                 log_btwdegree + log_CorridorIn + log_grav_total + (1 |region),newdata=TRANSIENT.std)
+#mcmc_areas(as.matrix(fit3),prob_outer = .99)
+#loo(MOD_S_1_run_TRANSIENT_null,MOD_S_1_run_TRANSIENT,fit2,fit3,fit4,fit5)
+#plot(MOD_S_1_run_TRANSIENT)
+#pp_check(MOD_S_1_run_TRANSIENT, resp="log_biomassarea")
+#pp_check(fit2, resp="Richness", nsamples = 1000)
 
-# SEM
-## scaled
-    # all_fit_brms = connectivity explains both biomass and species richness
-#TRANSIENT full
-all_fit_brms.tot.TRANSIENT.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                                      iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                      prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.tot.TRANSIENT.intr.extr_1.Rds")
+library(performance)
+r2_bayes(fit5.env)
+r2_bayes(MOD_S_1_run_TRANSIENT_null)
 
-#TRANSIENT simp
-all_fit_brms.tot.TRANSIENT.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.TRANSIENT.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp.transient + biom_mod_inflow.intr.extr.simp.transient + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
+### run biomass models
+
+## transient
+MOD_BIOM_1_run_TRANSIENT.null %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_TRANSIENT.null <-brm(MOD_B.null , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30))
+saveRDS(MOD_BIOM_1_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_1_run_TRANSIENT.Rds")
+
+
+
+MOD_BIOM_1_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_TRANSIENT <-brm(MOD_1_B , data=TRANSIENT.std,cores=4,chains = 4,
                                            iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
                                            prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.TRANSIENT.intr.extr.simp,"ACTIVE_models/InflowMPA/all_fit_brms.tot.TRANSIENT.intr.extr.simp_1.Rds")
+saveRDS(MOD_BIOM_1_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_1_run_TRANSIENT.Rds")
 
-#TRANSIENT species mediated
-all_fit_brms.nocon.S.TRANSIENT.intr.extr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.TRANSIENT.intr.extr <-brm(species_mod_inflow.intr.extr.simp.transient + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.TRANSIENT.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.S.TRANSIENT.intr.extr_1.Rds")
 
-# TRANSIENT no connectivity
-all_fit_brms.nocon.TRANSIENT %>% rm() # no connectivity for S and B, only environment
-all_fit_brms.nocon.TRANSIENT <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=TRANSIENT.std,cores=4,chains = 4,
-                                  iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                  prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.TRANSIENT,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.TRANSIENT_1.Rds")
+MOD_BIOM_2_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_2_run_TRANSIENT <-brm(MOD_2_B , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_2_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_2_run_TRANSIENT.Rds")
 
-# RESIDENT
-  # Full
-all_fit_brms.tot.RESID.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.RESID.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.RESID.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.tot.RESID.intr.extr_1.Rds")
 
-  # Simple
-all_fit_brms.tot.RESID.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.RESID.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp.resident + biom_mod_inflow.intr.extr.simp.resident + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.RESID.intr.extr.simp,"ACTIVE_models/InflowMPA/all_fit_brms.tot.RESID.intr.extr.simp_1.Rds")
+MOD_BIOM_3_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_3_run_TRANSIENT <-brm(MOD_3_B , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_3_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_3_run_TRANSIENT.Rds")
 
-  # species mediated
-all_fit_brms.nocon.S.RESID.intr.extr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.RESID.intr.extr <-brm(species_mod_inflow.intr.extr.simp.resident + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.RESID.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.S.RESID.intr.extr_1.Rds")
+MOD_BIOM_4_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_4_run_TRANSIENT <-brm(MOD_4_B , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_4_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_4_run_TRANSIENT.Rds")
 
-# no connectivity
-all_fit_brms.nocon.RESID %>% rm() # no connectivity for S and B, only environment
-all_fit_brms.nocon.RESID <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=RESID.std,cores=4,chains = 4,
-                                   iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.RESID,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.RESID_1.Rds")
+MOD_BIOM_5_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_5_run_TRANSIENT <-brm(MOD_5_B , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_5_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_5_run_TRANSIENT.Rds")
 
-# PARENTAL
-  # full
-all_fit_brms.tot.PARENTAL.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
-                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.PARENTAL.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.tot.PARENTAL.intr.extr_1.Rds")
+# model B env
+MOD_B_env %>% rm()  # Full - connectivity through both S and B
+MOD_B_env <-brm(B_mod_nocon , data=TRANSIENT.std,cores=4,chains = 4,
+                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_B_env,"ACTIVE_models/Full/MOD_B_env.Rds")
 
-  # simple
-all_fit_brms.tot.PARENTAL.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.PARENTAL.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp.parental + biom_mod_inflow.intr.extr.simp.parental + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
-                                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.PARENTAL.intr.extr.simp,"ACTIVE_models/InflowMPA/all_fit_brms.tot.PARENTAL.intr.extr.simp_1.Rds")
+#### test all S models
+r2_bayes(MOD_BIOM_1_run_TRANSIENT.null)
+r2_bayes(MOD_BIOM_1_run_TRANSIENT)
+r2_bayes(MOD_BIOM_2_run_TRANSIENT)
+r2_bayes(MOD_BIOM_3_run_TRANSIENT)
+r2_bayes(MOD_BIOM_4_run_TRANSIENT)
+r2_bayes(MOD_BIOM_5_run_TRANSIENT)
+r2_bayes(MOD_B_env)
+summary(MOD_B_env)
 
-  # species mediated
-all_fit_brms.nocon.S.PARENTAL.intr.extr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.PARENTAL.intr.extr <-brm(species_mod_inflow.intr.extr.simp.parental + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
-                                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.PARENTAL.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.S.PARENTAL.intr.extr_1.Rds")
+bayes_R2(MOD_BIOM_1_run_TRANSIENT)
 
-# no connectivity
-all_fit_brms.nocon.PARENTAL %>% rm() # no connectivity for S and B, only environment
-all_fit_brms.nocon.PARENTAL <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=PARENTAL.std,cores=4,chains = 4,
-                                   iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.PARENTAL,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.PARENTAL_1.Rds")
+loo(MOD_BIOM_1_run_TRANSIENT.null,MOD_BIOM_1_run_TRANSIENT,MOD_BIOM_2_run_TRANSIENT,
+    MOD_BIOM_3_run_TRANSIENT,MOD_BIOM_4_run_TRANSIENT,MOD_BIOM_5_run_TRANSIENT,MOD_B_env)
 
-# CRYPTIC
-  # full
-all_fit_brms.tot.CRYPTIC.intr.extr %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr + biom_mod_inflow.intr.extr + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
-                                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.CRYPTIC.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.tot.CRYPTIC.intr.extr_1.Rds")
+sort(model_weights(MOD_BIOM_1_run_TRANSIENT.null,MOD_BIOM_1_run_TRANSIENT,MOD_BIOM_2_run_TRANSIENT,
+              MOD_BIOM_3_run_TRANSIENT,MOD_BIOM_4_run_TRANSIENT,MOD_BIOM_5_run_TRANSIENT,MOD_B_env,weights="loo"),decreasing=T)
 
-# simple
-all_fit_brms.tot.CRYPTIC.intr.extr.simp %>% rm()  # Full - connectivity through both S and B
-all_fit_brms.tot.CRYPTIC.intr.extr.simp <-brm(species_mod_inflow.intr.extr.simp.cryptic + biom_mod_inflow.intr.extr.simp.cryptic + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
-                                         iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                         prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.tot.CRYPTIC.intr.extr.simp,"ACTIVE_models/InflowMPA/all_fit_brms.tot.CRYPTIC.intr.extr.simp_1.Rds")
+plot(conditional_effects(MOD_BIOM_2_run_TRANSIENT))
 
-# species mediated
-all_fit_brms.nocon.S.CRYPTIC.intr.extr %>% rm() # connectivity only through S + ENV
-all_fit_brms.nocon.S.CRYPTIC.intr.extr <-brm(species_mod_inflow.intr.extr.simp.cryptic + biom_mod_nocon.S + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
-                                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.S.CRYPTIC.intr.extr,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.S.CRYPTIC.intr.extr_1.Rds")
+mcmc_plot(MOD_BIOM_1_run_TRANSIENT, pars = "^b_")
+mcmc_plot(MOD_B_env, pars = "^b_")
 
-all_fit_brms.nocon.CRYPTIC %>% rm() # no connectivity for S and B, only environment
-all_fit_brms.nocon.CRYPTIC <-brm(S_mod_nocon + biom_mod_nocon.S + set_rescor(FALSE), data=CRYPTIC.std,cores=4,chains = 4,
-                                   iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                                   prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(all_fit_brms.nocon.CRYPTIC,"ACTIVE_models/InflowMPA/all_fit_brms.nocon.CRYPTIC_1.Rds")
+mcmc_plot(MOD_S_2_run_TRANSIENT, pars = "^b_")
+mcmc_plot(MOD_S_env, pars = "^b_")
+
+posterior <- as.array(MOD_BIOM_1_run_TRANSIENT)
+dim(posterior)
+
+if (requireNamespace("hexbin", quietly = TRUE)) {
+  mcmc_hex(posterior, pars = c("b_log_InflowMPA", "b_log_InflowNei"))
+}
+
+mcmc_pairs(posterior, pars = c("b_Netflow","b_log_InflowMPA", "b_log_InflowNei",
+                               "b_log_grav_total","b_log_SelfR"), diag_fun = "dens", off_diag_fun = "hex")
+color_scheme_set("pink")
+mcmc_pairs(posterior, pars = c("Netflow", "log_InflowMPA"),
+           off_diag_args = list(size = 1.5))
+#
+color_scheme_set("pink")
+(p3 <- mcmc_scatter(posterior, pars = c("b_log_InflowMPA", "b_log_InflowNei"), alpha = 0.25, size = 3))
+p3 + geom_smooth(method = "lm", se = FALSE, color = "gray20",
+                 size = .75, linetype = 2)
+
+(p3 <- mcmc_scatter(posterior, pars = c("b_Netflow", "b_log_InflowNei"), alpha = 0.25, size = 3))
+p3 + geom_smooth(method = "lm", se = FALSE, color = "gray20",
+                 size = .75, linetype = 2)
+
+(p3 <- mcmc_scatter(posterior, pars = c("b_Netflow", "b_log_InflowNei"), alpha = 0.25, size = 3))
+p3 + geom_smooth(method = "lm", se = FALSE, color = "gray20",
+                 size = .75, linetype = 2)
+
+(p3 <- mcmc_scatter(posterior, pars = c("b_log_InflowNei", "b_log_InflowMPA"), alpha = 0.25, size = 3))
+p3 + geom_smooth(method = "lm", se = FALSE, color = "gray20",
+                 size = .75, linetype = 2)
+(p3 <- mcmc_scatter(posterior, pars = c("b_Netflow", "b_log_SelfR"), alpha = 0.25, size = 3))
+p3 + geom_smooth(method = "lm", se = FALSE, color = "gray20",
+                 size = .75, linetype = 2)
+
+
+
+#> `geom_smooth()` using formula 'y ~ x'
+
+summary(MOD_BIOM_1_run_TRANSIENT)
+summary(MOD_BIOM_2_run_TRANSIENT)
+summary(MOD_BIOM_3_run_TRANSIENT)
+summary(MOD_BIOM_4_run_TRANSIENT)
+summary(MOD_B_env)
+plot(MOD_BIOM_1_run_TRANSIENT)
+rm(fit2)
+fit2 <- update(MOD_BIOM_1_run_TRANSIENT, formula. = . ~ Richness + 
+                 temp + prod.annual + 
+                 log_grav_total*Class*Netflow +  (1 |region),newdata=TRANSIENT.std)
+rm(fit3)
+fit3 <- update(MOD_BIOM_1_run_TRANSIENT, formula. = . ~ Richness + 
+                 prod.annual + 
+                 log_grav_total*Class*Netflow +  (1 |region),newdata=TRANSIENT.std)
+
+fit.env <- update(MOD_BIOM_1_run_TRANSIENT, formula. = . ~  prod.annual + 
+                     temp  +   log_grav_total*Class + (1 |region),newdata=TRANSIENT.std)
+
+
+mcmc_areas(as.matrix(fit3),prob_outer = .99)
+summary(MOD_BIOM_1_run_TRANSIENT)
+summary(fit3)
+summary(fit4)
+summary(fit5)
+loo(MOD_BIOM_1_run_TRANSIENT.null,MOD_BIOM_1_run_TRANSIENT,fit2)
+#,fit3,fit4,fit5)
+
+plot(MOD_S_1_run_TRANSIENT)
+
+plot(fit4)
+plot(fit5)
+plot(fit5.env)
+
+brms::pp_check(MOD_BIOM_1_run_TRANSIENT, resp="log_biomassarea", nsamples = 100)
+pp_check(fit2, resp="Richness", nsamples = 1000)
+bayes_R2(MOD_BIOM_1_run_TRANSIENT)
+bayes_R2(fit2)
+bayes_R2(fit3)
+bayes_R2(fit4)
+bayes_R2(fit5)
+bayes_R2(fit.env)
+
+library(performance)
+r2_bayes(MOD_BIOM_1_run_TRANSIENT.null)
+r2_bayes(MOD_BIOM_1_run_TRANSIENT)
+r2_bayes(fit2)
+r2_bayes(fit3)
+r2_bayes(fit.env)
+
+bayes_R2(MOD_S_1_run_TRANSIENT_null)
+
+
+## cryptic
+
+
+## transient
+MOD_BIOM_1_run_CRYPTIC.null %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_CRYPTIC.null <-brm(MOD_B.null , data=CRYPTIC.std,cores=4,chains = 4,
+                                    iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30))
+saveRDS(MOD_BIOM_1_run_CRYPTIC,"ACTIVE_models/Full/MOD_BIOM_1_run_CRYPTIC.Rds")
+
+
+
+MOD_BIOM_1_run_CRYPTIC %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_CRYPTIC <-brm(MOD_1_B , data=CRYPTIC.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_1_run_CRYPTIC,"ACTIVE_models/Full/MOD_BIOM_1_run_CRYPTIC.Rds")
+
+
+MOD_BIOM_2_run_CRYPTIC %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_2_run_CRYPTIC <-brm(MOD_2_B , data=CRYPTIC.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_2_run_CRYPTIC,"ACTIVE_models/Full/MOD_BIOM_2_run_CRYPTIC.Rds")
+
+
+MOD_BIOM_3_run_CRYPTIC %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_3_run_CRYPTIC <-brm(MOD_3_B , data=CRYPTIC.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_3_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_3_run_CRYPTIC.Rds")
+
+MOD_BIOM_4_run_TRANSIENT %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_4_run_TRANSIENT <-brm(MOD_4_B , data=TRANSIENT.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_4_run_TRANSIENT,"ACTIVE_models/Full/MOD_BIOM_4_run_CRYPTIC.Rds")
+
+#### test all S models
+r2_bayes(MOD_BIOM_1_run_TRANSIENT.null)
+r2_bayes(MOD_BIOM_1_run_TRANSIENT)
+r2_bayes(MOD_BIOM_2_run_TRANSIENT)
+r2_bayes(MOD_BIOM_3_run_TRANSIENT)
+r2_bayes(MOD_BIOM_4_run_TRANSIENT)
+
+loo(MOD_BIOM_1_run_TRANSIENT.null,MOD_BIOM_1_run_TRANSIENT,MOD_BIOM_2_run_TRANSIENT,
+    MOD_BIOM_3_run_TRANSIENT,MOD_BIOM_4_run_TRANSIENT)
+
+
 
 
 #### END OF MODELS
