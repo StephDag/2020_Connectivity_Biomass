@@ -431,12 +431,6 @@ MOD_BIOM_4_run_CRYPTIC <-brm(MOD_4_B , data=CRYPTIC.std,cores=4,chains = 4,
                                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 saveRDS(MOD_BIOM_4_run_CRYPTIC,"ACTIVE_models/Full/MOD_BIOM_4_run_CRYPTIC.Rds")
 
-MOD_BIOM_5_run_CRYPTIC %>% rm()  # Full - connectivity through both S and B
-MOD_BIOM_5_run_CRYPTIC <-brm(MOD_5_B , data=CRYPTIC.std,cores=4,chains = 4,
-                               iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                               prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(MOD_BIOM_5_run_CRYPTIC,"ACTIVE_models/Full/MOD_BIOM_5_run_CRYPTIC.Rds")
-
 # model B env
 MOD_B_env %>% rm()  # Full - connectivity through both S and B
 MOD_B_env <-brm(B_mod_nocon , data=CRYPTIC.std,cores=4,chains = 4,
@@ -467,16 +461,309 @@ rownames(model.W.CRYPTIC.B) <- rep("CRYPTIC",1)
 
 #plot(conditional_effects(MOD_BIOM_2_run_CRYPTIC))
 
-# Model 1 species richness
-coef_plot_model1_S_CRYPTIC <- mcmc_plot(MOD_S_1_run_CRYPTIC, pars = "^b_")
+# Model 3 species richness
+coef_plot_model3_S_CRYPTIC <- mcmc_plot(MOD_S_3_run_CRYPTIC, pars = "^b_")
 # Model 1 biomass
 coef_plot_model1_B_CRYPTIC <- mcmc_plot(MOD_BIOM_1_run_CRYPTIC, pars = "^b_")
 
 
+
+##########################
+###     RESIDENT      ####
+##########################
+
+### run species models
+# null model
+MOD_S_1_run_RESID_null %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_RESID_null <-brm(MOD_1_S_null , data=RESID.std,cores=4,chains = 4,
+                               iter = 5000, warmup = 1000,thin = 2)
+saveRDS(MOD_S_1_run_RESID,"ACTIVE_models/Full/MOD_S_1_run_RESID_null.Rds")
+
+# model 1
+MOD_S_1_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_RESID <-brm(MOD_1_S , data=RESID.std,cores=4,chains = 4,
+                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_1_run_RESID,"ACTIVE_models/Full/MOD_S_1_run_RESID.Rds")
+# model 2
+MOD_S_2_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_S_2_run_RESID <-brm(MOD_2_S , data=RESID.std,cores=4,chains = 4,
+                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_2_run_RESID,"ACTIVE_models/Full/MOD_S_2_run_RESID.Rds")
+
+# model 3
+MOD_S_3_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_S_3_run_RESID <-brm(MOD_3_S , data=RESID.std,cores=4,chains = 4,
+                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_3_run_RESID,"ACTIVE_models/Full/MOD_S_3_run_RESID.Rds")
+
+# model 4
+MOD_S_4_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_S_4_run_RESID <-brm(MOD_4_S , data=RESID.std,cores=4,chains = 4,
+                          iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                          prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_4_run_RESID,"ACTIVE_models/Full/MOD_S_4_run_RESID.Rds")
+
+# model S env
+MOD_S_env %>% rm()  # Full - connectivity through both S and B
+MOD_S_env <-brm(S_mod_nocon , data=RESID.std,cores=4,chains = 4,
+                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_env,"ACTIVE_models/Full/MOD_S_env.Rds")
+
+#### test all S models RESID
+r2_bayes.RESID.S <- rbind(c(r2_bayes(MOD_S_1_run_RESID_null)[1],
+                              r2_bayes(MOD_S_1_run_RESID)[1],
+                              r2_bayes(MOD_S_2_run_RESID)[1],
+                              r2_bayes(MOD_S_3_run_RESID)[1],
+                              r2_bayes(MOD_S_4_run_RESID)[1],
+                              r2_bayes(MOD_S_env)[1]),
+                            c(r2_bayes(MOD_S_1_run_RESID_null)[2],
+                              r2_bayes(MOD_S_1_run_RESID)[2],
+                              r2_bayes(MOD_S_2_run_RESID)[2],
+                              r2_bayes(MOD_S_3_run_RESID)[2],
+                              r2_bayes(MOD_S_4_run_RESID)[2],
+                              r2_bayes(MOD_S_env)[2]))
+colnames(r2_bayes.RESID.S) <- c("S_model_null","S_model_1","S_model_2","S_model_3","S_model_4","S_model_ENV")
+rownames(r2_bayes.RESID.S) <- rep("RESID",2)
+model.W.RESID.S <- model_weights(MOD_S_1_run_RESID_null,MOD_S_1_run_RESID,
+                                   MOD_S_2_run_RESID,MOD_S_3_run_RESID,
+                                   MOD_S_4_run_RESID,MOD_S_env,weights="loo")
+names(model.W.RESID.S) <- c("S_model_null","S_model_1","S_model_2","S_model_3","S_model_4","S_model_ENV")
+
+#fit3 <- update(MOD_S_1_run_RESID, formula. = . ~ temp + prod.annual + 
+#                 log_btwdegree + log_CorridorIn + log_grav_total + (1 |region),newdata=RESID.std)
+#mcmc_areas(as.matrix(fit3),prob_outer = .99)
+#loo(MOD_S_1_run_RESID_null,MOD_S_1_run_RESID,fit2,fit3,fit4,fit5)
+#plot(MOD_S_1_run_RESID)
+#pp_check(MOD_S_1_run_RESID, resp="log_biomassarea")
+brms::pp_check(MOD_S_1_run_RESID, resp="Richness", nsamples = 100)
+brms::pp_check(MOD_BIOM_1_run_RESID, resp="Richness", nsamples = 100)
+#r2_bayes(MOD_S_1_run_RESID_null)
+
+### run biomass models
+
+## RESID
+MOD_BIOM_1_run_RESID.null %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_RESID.null <-brm(MOD_B.null , data=RESID.std,cores=4,chains = 4,
+                                  iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30))
+saveRDS(MOD_BIOM_1_run_RESID,"ACTIVE_models/Full/MOD_BIOM_1_run_RESID.Rds")
+
+MOD_BIOM_1_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_RESID <-brm(MOD_1_B , data=RESID.std,cores=4,chains = 4,
+                             iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                             prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_1_run_RESID,"ACTIVE_models/Full/MOD_BIOM_1_run_RESID.Rds")
+
+
+MOD_BIOM_2_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_2_run_RESID <-brm(MOD_2_B , data=RESID.std,cores=4,chains = 4,
+                             iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                             prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_2_run_RESID,"ACTIVE_models/Full/MOD_BIOM_2_run_RESID.Rds")
+
+
+MOD_BIOM_3_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_3_run_RESID <-brm(MOD_3_B , data=RESID.std,cores=4,chains = 4,
+                             iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                             prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_3_run_RESID,"ACTIVE_models/Full/MOD_BIOM_3_run_RESID.Rds")
+
+MOD_BIOM_4_run_RESID %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_4_run_RESID <-brm(MOD_4_B , data=RESID.std,cores=4,chains = 4,
+                             iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                             prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_4_run_RESID,"ACTIVE_models/Full/MOD_BIOM_4_run_RESID.Rds")
+
+# model B env
+MOD_B_env %>% rm()  # Full - connectivity through both S and B
+MOD_B_env <-brm(B_mod_nocon , data=RESID.std,cores=4,chains = 4,
+                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_B_env,"ACTIVE_models/Full/MOD_B_env.Rds")
+
+#### test all B models
+r2_bayes.RESID.B <- rbind(c(r2_bayes(MOD_BIOM_1_run_RESID.null)[1],
+                              r2_bayes(MOD_BIOM_1_run_RESID)[1],
+                              r2_bayes(MOD_BIOM_2_run_RESID)[1],
+                              r2_bayes(MOD_BIOM_3_run_RESID)[1],
+                              r2_bayes(MOD_BIOM_4_run_RESID)[1],
+                              r2_bayes(MOD_B_env)[1]),
+                            c(r2_bayes(MOD_BIOM_1_run_RESID.null)[2],
+                              r2_bayes(MOD_BIOM_1_run_RESID)[2],
+                              r2_bayes(MOD_BIOM_2_run_RESID)[2],
+                              r2_bayes(MOD_BIOM_3_run_RESID)[2],
+                              r2_bayes(MOD_BIOM_4_run_RESID)[2],
+                              r2_bayes(MOD_B_env)[1]))
+colnames(r2_bayes.RESID.B) <- c("B_model_null","B_model_1","B_model_2","B_model_3","B_model_4","B_model_ENV")
+rownames(r2_bayes.RESID.B) <- rep("RESID",2)
+model.W.RESID.B <- model_weights(MOD_BIOM_1_run_RESID.null,MOD_BIOM_1_run_RESID,
+                                   MOD_BIOM_2_run_RESID,MOD_BIOM_3_run_RESID,
+                                   MOD_BIOM_4_run_RESID,MOD_B_env,weights="loo")
+names(model.W.RESID.B) <- c("B_model_null","B_model_1","B_model_2","B_model_3","B_model_4","B_model_ENV")
+#rownames(model.W.RESID.B) <- rep("RESID",1)
+
+#plot(conditional_effects(MOD_BIOM_2_run_RESID))
+
+# Model 3 species richness
+coef_plot_model3_S_RESID <- mcmc_plot(MOD_S_3_run_RESID, pars = "^b_")
+# Model 2 biomass
+coef_plot_model2_B_RESID <- mcmc_plot(MOD_BIOM_2_run_RESID, pars = "^b_")
+
+
+##########################
+###     PARENTAL      ####
+##########################
+
+### run species models
+# null model
+MOD_S_1_run_PARENTAL_null %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_PARENTAL_null <-brm(MOD_1_S_null , data=PARENTAL.std,cores=4,chains = 4,
+                             iter = 5000, warmup = 1000,thin = 2)
+saveRDS(MOD_S_1_run_PARENTAL,"ACTIVE_models/Full/MOD_S_1_run_PARENTAL_null.Rds")
+
+# model 1
+MOD_S_1_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_S_1_run_PARENTAL <-brm(MOD_1_S , data=PARENTAL.std,cores=4,chains = 4,
+                        iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_1_run_PARENTAL,"ACTIVE_models/Full/MOD_S_1_run_PARENTAL.Rds")
+# model 2
+MOD_S_2_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_S_2_run_PARENTAL <-brm(MOD_2_S , data=PARENTAL.std,cores=4,chains = 4,
+                        iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_2_run_PARENTAL,"ACTIVE_models/Full/MOD_S_2_run_PARENTAL.Rds")
+
+# model 3
+MOD_S_3_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_S_3_run_PARENTAL <-brm(MOD_3_S , data=PARENTAL.std,cores=4,chains = 4,
+                        iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_3_run_PARENTAL,"ACTIVE_models/Full/MOD_S_3_run_PARENTAL.Rds")
+
+# model 4
+MOD_S_4_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_S_4_run_PARENTAL <-brm(MOD_4_S , data=PARENTAL.std,cores=4,chains = 4,
+                        iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                        prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_4_run_PARENTAL,"ACTIVE_models/Full/MOD_S_4_run_PARENTAL.Rds")
+
+# model S env
+MOD_S_env %>% rm()  # Full - connectivity through both S and B
+MOD_S_env <-brm(S_mod_nocon , data=PARENTAL.std,cores=4,chains = 4,
+                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_S_env,"ACTIVE_models/Full/MOD_S_env.Rds")
+
+#### test all S models PARENTAL
+r2_bayes.PARENTAL.S <- rbind(c(r2_bayes(MOD_S_1_run_PARENTAL_null)[1],
+                            r2_bayes(MOD_S_1_run_PARENTAL)[1],
+                            r2_bayes(MOD_S_2_run_PARENTAL)[1],
+                            r2_bayes(MOD_S_3_run_PARENTAL)[1],
+                            r2_bayes(MOD_S_4_run_PARENTAL)[1],
+                            r2_bayes(MOD_S_env)[1]),
+                          c(r2_bayes(MOD_S_1_run_PARENTAL_null)[2],
+                            r2_bayes(MOD_S_1_run_PARENTAL)[2],
+                            r2_bayes(MOD_S_2_run_PARENTAL)[2],
+                            r2_bayes(MOD_S_3_run_PARENTAL)[2],
+                            r2_bayes(MOD_S_4_run_PARENTAL)[2],
+                            r2_bayes(MOD_S_env)[2]))
+colnames(r2_bayes.PARENTAL.S) <- c("S_model_null","S_model_1","S_model_2","S_model_3","S_model_4","S_model_ENV")
+rownames(r2_bayes.PARENTAL.S) <- rep("PARENTAL",2)
+model.W.PARENTAL.S <- model_weights(MOD_S_1_run_PARENTAL_null,MOD_S_1_run_PARENTAL,
+                                 MOD_S_2_run_PARENTAL,MOD_S_3_run_PARENTAL,
+                                 MOD_S_4_run_PARENTAL,MOD_S_env,weights="loo")
+names(model.W.PARENTAL.S) <- c("S_model_null","S_model_1","S_model_2","S_model_3","S_model_4","S_model_ENV")
+
+#fit3 <- update(MOD_S_1_run_PARENTAL, formula. = . ~ temp + prod.annual + 
+#                 log_btwdegree + log_CorridorIn + log_grav_total + (1 |region),newdata=PARENTAL.std)
+#mcmc_areas(as.matrix(fit3),prob_outer = .99)
+#loo(MOD_S_1_run_PARENTAL_null,MOD_S_1_run_PARENTAL,fit2,fit3,fit4,fit5)
+#plot(MOD_S_1_run_PARENTAL)
+#pp_check(MOD_S_1_run_PARENTAL, resp="log_biomassarea")
+brms::pp_check(MOD_S_1_run_PARENTAL, resp="Richness", nsamples = 100)
+brms::pp_check(MOD_BIOM_1_run_PARENTAL, resp="Richness", nsamples = 100)
+#r2_bayes(MOD_S_1_run_PARENTAL_null)
+
+### run biomass models
+
+## PARENTAL
+MOD_BIOM_1_run_PARENTAL.null %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_PARENTAL.null <-brm(MOD_B.null , data=PARENTAL.std,cores=4,chains = 4,
+                                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30))
+saveRDS(MOD_BIOM_1_run_PARENTAL,"ACTIVE_models/Full/MOD_BIOM_1_run_PARENTAL.Rds")
+
+MOD_BIOM_1_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_1_run_PARENTAL <-brm(MOD_1_B , data=PARENTAL.std,cores=4,chains = 4,
+                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_1_run_PARENTAL,"ACTIVE_models/Full/MOD_BIOM_1_run_PARENTAL.Rds")
+
+
+MOD_BIOM_2_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_2_run_PARENTAL <-brm(MOD_2_B , data=PARENTAL.std,cores=4,chains = 4,
+                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_2_run_PARENTAL,"ACTIVE_models/Full/MOD_BIOM_2_run_PARENTAL.Rds")
+
+
+MOD_BIOM_3_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_3_run_PARENTAL <-brm(MOD_3_B , data=PARENTAL.std,cores=4,chains = 4,
+                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_3_run_PARENTAL,"ACTIVE_models/Full/MOD_BIOM_3_run_PARENTAL.Rds")
+
+MOD_BIOM_4_run_PARENTAL %>% rm()  # Full - connectivity through both S and B
+MOD_BIOM_4_run_PARENTAL <-brm(MOD_4_B , data=PARENTAL.std,cores=4,chains = 4,
+                           iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                           prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_BIOM_4_run_PARENTAL,"ACTIVE_models/Full/MOD_BIOM_4_run_PARENTAL.Rds")
+
+# model B env
+MOD_B_env %>% rm()  # Full - connectivity through both S and B
+MOD_B_env <-brm(B_mod_nocon , data=PARENTAL.std,cores=4,chains = 4,
+                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
+                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
+saveRDS(MOD_B_env,"ACTIVE_models/Full/MOD_B_env.Rds")
+
+#### test all B models
+r2_bayes.PARENTAL.B <- rbind(c(r2_bayes(MOD_BIOM_1_run_PARENTAL.null)[1],
+                            r2_bayes(MOD_BIOM_1_run_PARENTAL)[1],
+                            r2_bayes(MOD_BIOM_2_run_PARENTAL)[1],
+                            r2_bayes(MOD_BIOM_3_run_PARENTAL)[1],
+                            r2_bayes(MOD_BIOM_4_run_PARENTAL)[1],
+                            r2_bayes(MOD_B_env)[1]),
+                          c(r2_bayes(MOD_BIOM_1_run_PARENTAL.null)[2],
+                            r2_bayes(MOD_BIOM_1_run_PARENTAL)[2],
+                            r2_bayes(MOD_BIOM_2_run_PARENTAL)[2],
+                            r2_bayes(MOD_BIOM_3_run_PARENTAL)[2],
+                            r2_bayes(MOD_BIOM_4_run_PARENTAL)[2],
+                            r2_bayes(MOD_B_env)[1]))
+colnames(r2_bayes.PARENTAL.B) <- c("B_model_null","B_model_1","B_model_2","B_model_3","B_model_4","B_model_ENV")
+rownames(r2_bayes.PARENTAL.B) <- rep("PARENTAL",2)
+model.W.PARENTAL.B <- model_weights(MOD_BIOM_1_run_PARENTAL.null,MOD_BIOM_1_run_PARENTAL,
+                                 MOD_BIOM_2_run_PARENTAL,MOD_BIOM_3_run_PARENTAL,
+                                 MOD_BIOM_4_run_PARENTAL,MOD_B_env,weights="loo")
+names(model.W.PARENTAL.B) <- c("B_model_null","B_model_1","B_model_2","B_model_3","B_model_4","B_model_ENV")
+#rownames(model.W.PARENTAL.B) <- rep("PARENTAL",1)
+
+#plot(conditional_effects(MOD_BIOM_2_run_PARENTAL))
+
+# Model 3 species richness
+coef_plot_model3_S_PARENTAL <- mcmc_plot(MOD_S_3_run_PARENTAL, pars = "^b_")
+# Model 2 biomass
+coef_plot_model2_B_PARENTAL <- mcmc_plot(MOD_BIOM_2_run_PARENTAL, pars = "^b_")
+
+
+
+
 ### mcmc plots together
-ggarrange(coef_plot_model1_S_transient, XX, XX,XX,
-          coef_plot_model1_B_transient,XX,XX,XX, ncol = 4, nrow = 2,labels =c("Transient_S_model_1","Cryptic_S_model_X","Resident_S_model_X","Parental_S_model_X",
-                                                      "Transient_B_model_1","Cryptic_B_model_X","Resident_B_model_X","Parental_B_model_X"))
+ggarrange(coef_plot_model1_S_transient,coef_plot_model3_S_CRYPTIC,coef_plot_model3_S_RESID,XX,
+          coef_plot_model1_B_transient,coef_plot_model1_B_CRYPTIC,coef_plot_model2_B_RESID,XX, ncol = 4, nrow = 2,labels =c("Transient_S_model_1","Cryptic_S_model_3","Resident_S_model_3","Parental_S_model_X",
+                                                      "Transient_B_model_1","Cryptic_B_model_1","Resident_B_model_2","Parental_B_model_X"))
 
 
 ##### END ####
