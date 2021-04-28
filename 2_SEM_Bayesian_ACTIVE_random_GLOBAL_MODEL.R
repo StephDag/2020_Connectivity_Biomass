@@ -559,13 +559,6 @@ MOD_BIOM_4_run_GLOBAL_PASSIVE <-brm(MOD_4_B , data=PASSIVE.sub.V2.std,cores=4,ch
                                     prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
 saveRDS(MOD_BIOM_4_run_GLOBAL_PASSIVE,"Models/GLOBAL/MOD_BIOM_4_run_GLOBAL_PASSIVE_V2.Rds")
 
-# model B env
-MOD_B_env %>% rm()  # Full - connectivity through both S and B
-MOD_B_env <-brm(B_mod_nocon , data=PASSIVE.sub.V2.std,cores=4,chains = 4,
-                iter = 5000, warmup = 1000,thin = 2, refresh = 0, control = list(adapt_delta = 0.99999,max_treedepth = 30),
-                prior = c(prior(normal(0, 100),class = "Intercept"), prior(normal(0, 100), class = "b")))
-saveRDS(MOD_B_env,"Models/GLOBAL/MOD_B_env_V2.Rds")
-
 #### test all B models
 r2_bayes.GLOBAL_PASSIVE.B <- rbind(c(r2_bayes(MOD_BIOM_1_run_GLOBAL_PASSIVE.null)[1],
                                      r2_bayes(MOD_BIOM_1_run_GLOBAL_PASSIVE)[1],
@@ -594,31 +587,37 @@ coef_plot_model1_S_GLOBAL_PASSIVE <- mcmc_plot(MOD_S_1_run_GLOBAL_PASSIVE, pars 
 # Model 1 biomass
 coef_plot_model1_B_GLOBAL_PASSIVE <- mcmc_plot(MOD_BIOM_1_run_GLOBAL_PASSIVE, pars = "^b_")
 
+mcmc_plot(MOD_S_1_run_GLOBAL_ACTIVE2, pars = "^b_")
+r2_bayes(MOD_S_1_run_GLOBAL_ACTIVE1)
+r2_bayes(MOD_S_1_run_GLOBAL_ACTIVE2)
 
-
+summary(MOD_S_1_run_GLOBAL_ACTIVE1)
+summary(MOD_S_1_run_GLOBAL_ACTIVE2)
+summary(MOD_S_1_run_GLOBAL_PASSIVE)
 
 #######################
 ####       ALL        #
 #######################
 
 ### mcmc plots together
-S.all.active <- ggarrange(coef_plot_model1_S_transient,coef_plot_model3_S_CRYPTIC,coef_plot_model3_S_RESID,coef_plot_model3_S_PARENTAL,ncol=2,nrow=2,labels =c("Transient_S_model_1","Cryptic_S_model_3","Resident_S_model_3","Parental_S_model_3"))
-B.all.active <- ggarrange(coef_plot_model1_B_transient,coef_plot_model1_B_CRYPTIC,coef_plot_model2_B_RESID,coef_plot_model2_B_PARENTAL, ncol = 2, nrow = 2,
-                                                      labels=c("Transient_B_model_1","Cryptic_B_model_1","Resident_B_model_2","Parental_B_model_2"))
+S.all <- ggarrange(coef_plot_model1_S_GLOBAL_ACTIVE1 ,coef_plot_model1_S_GLOBAL_ACTIVE2 ,coef_plot_model1_S_GLOBAL_PASSIVE,
+                   labels=c("GLOBAL_S_ACTIVE_1_model_1","GLOBAL_S_ACTIVE_2_model_1","GLOBAL_S_PASSIVE_model_1"),ncol = 1, nrow = 3) 
+B.all <- ggarrange(coef_plot_model1_B_GLOBAL_ACTIVE1 ,coef_plot_model1_B_GLOBAL_ACTIVE1 ,coef_plot_model1_B_GLOBAL_PASSIVE, ncol = 1, nrow = 3,
+labels=c("GLOBAL_B_ACTIVE_1_model_1","GLOBAL_B_ACTIVE_2_model_1","GLOBAL_B_PASSIVE_model_1"))
 
-ggsave("Models/ACTIVE V2/ACTIVE_S_coeffs_V2.pdf",S.all.active,width=10,height=10)
-ggsave("Models/ACTIVE V2/ACTIVE_B_coeffs_V2.pdf",B.all.active,width=10,height=10)
+ggsave("Models/GLOBAL/GLOBAL_S_coeffs.pdf",S.all,width=10,height=10)
+ggsave("Models/GLOBAL/GLOBAL_B_coeffs.pdf",B.all,width=10,height=10)
 
 ### R2 together
-r2_bayes.S.all <- rbind(r2_bayes.transient.S,r2_bayes.CRYPTIC.S,r2_bayes.RESID.S,r2_bayes.PARENTAL.S)
-write.csv(r2_bayes.S.all,"Models/ACTIVE V2/ACTIVE_S_R2_V2.csv")
-r2_bayes.B.all <- rbind(r2_bayes.transient.B,r2_bayes.CRYPTIC.B,r2_bayes.RESID.B,r2_bayes.PARENTAL.B)
-write.csv(r2_bayes.B.all,"Models/ACTIVE V2/ACTIVE_S_R2_V2.csv")
+r2_bayes.S.all <- rbind(r2_bayes.GLOBAL_ACTIVE1.S,r2_bayes.GLOBAL_ACTIVE2.S,r2_bayes.GLOBAL_PASSIVE.S)
+write.csv(r2_bayes.S.all,"Models/GLOBAL/GLOBAL_S_R2.csv")
+r2_bayes.B.all <- rbind(r2_bayes.GLOBAL_ACTIVE1.B,r2_bayes.GLOBAL_ACTIVE2.B,r2_bayes.GLOBAL_PASSIVE.B)
+write.csv(r2_bayes.B.all,"Models/GLOBAL/GLOBAL_B_R2.csv")
 
 ### weights
-weight_active_S_B <- rbind(model.W.transient.S,model.W.CRYPTIC.S,model.W.RESID.S,model.W.PARENTAL.S,
-      model.W.transient.B,model.W.CRYPTIC.B,model.W.RESID.B,model.W.PARENTAL.B)
-write.csv(weight_active_S_B,"Models/ACTIVE V2/ACTIVE_S_B_weights_V2.csv")
+weight_active_S_B <- rbind(model.W.GLOBAL_ACTIVE1.S,model.W.GLOBAL_ACTIVE2.S,model.W.GLOBAL_PASSIVE.S,
+      model.W.GLOBAL_ACTIVE1.B,model.W.GLOBAL_ACTIVE2.B,model.W.GLOBAL_PASSIVE.B) 
+write.csv(weight_active_S_B,"Models/GLOBAL/GLOBAL_S_B_weights.csv")
 
 ######################
 ###      END       ###
