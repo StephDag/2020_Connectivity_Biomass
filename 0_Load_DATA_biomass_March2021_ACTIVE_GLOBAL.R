@@ -115,6 +115,10 @@ colnames(ACTIVE.1.sub.V2.std)[1] <- "region"
 colnames(ACTIVE.1.sub.V2.std)[20] <- "Class"
 head(ACTIVE.1.sub.V2.std)
 
+# Fished as the reference
+ACTIVE.1.sub.V2.std$Class <- relevel(ACTIVE.1.sub.V2.std$Class, ref="Fished")
+summary(ACTIVE.1.sub.V2.std)
+
 # save all.data file
 saveRDS(ACTIVE.1.sub.V2.std,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_April2021_GLOBAL_ACTIVE1_std.rds"))
 
@@ -164,6 +168,9 @@ ACTIVE.2.sub.V2.std$logbiomassarea <- log(ACTIVE.2.sub.V2$biomassare+1)
 colnames(ACTIVE.2.sub.V2.std)[1] <- "region"
 colnames(ACTIVE.2.sub.V2.std)[20] <- "Class"
 head(ACTIVE.2.sub.V2.std)
+
+ACTIVE.2.sub.V2.std$Class <- relevel(ACTIVE.2.sub.V2.std$Class, ref="Fished")
+summary(ACTIVE.2.sub.V2.std)
 
 # save all.data file
 saveRDS(ACTIVE.2.sub.V2.std,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_April2021_GLOBAL_ACTIVE2_std.rds"))
@@ -215,6 +222,10 @@ PASSIVE.sub.V2.std$logbiomassarea <- log(PASSIVE.sub.V2$biomassare+1)
 colnames(PASSIVE.sub.V2.std)[1] <- "region"
 colnames(PASSIVE.sub.V2.std)[20] <- "Class"
 head(PASSIVE.sub.V2.std)
+
+# reference level
+PASSIVE.sub.V2.std$Class <- relevel(v.sub.V2.std$Class, ref="Fished")
+summary(PASSIVE.sub.V2.std)
 
 # save all.data file
 saveRDS(PASSIVE.sub.V2.std,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_April2021_GLOBAL_PASSIVE_std.rds"))
