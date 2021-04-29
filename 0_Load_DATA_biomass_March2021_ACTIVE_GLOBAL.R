@@ -224,7 +224,7 @@ colnames(PASSIVE.sub.V2.std)[20] <- "Class"
 head(PASSIVE.sub.V2.std)
 
 # reference level
-PASSIVE.sub.V2.std$Class <- relevel(v.sub.V2.std$Class, ref="Fished")
+PASSIVE.sub.V2.std$Class <- relevel(PASSIVE.sub.V2.std$Class, ref="Fished")
 summary(PASSIVE.sub.V2.std)
 
 # save all.data file

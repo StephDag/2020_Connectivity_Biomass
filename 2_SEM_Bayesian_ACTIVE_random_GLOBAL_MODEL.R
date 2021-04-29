@@ -298,9 +298,13 @@ names(model.W.GLOBAL_ACTIVE1.B) <- c("B_model_null","B_model_1","B_model_2","B_m
 #plot(conditional_effects(MOD_BIOM_2_run_GLOBAL_ACTIVE1))
 
 # Model 1 species richness
-coef_plot_model1_S_GLOBAL_ACTIVE1 <- mcmc_plot(MOD_S_1_run_GLOBAL_ACTIVE1, pars = "^b_")
+coef_plot_model4_S_GLOBAL_ACTIVE1 <- mcmc_plot(MOD_S_4_run_GLOBAL_ACTIVE1, pars = "^b_")
+coef_plot_model_S_ENV <- mcmc_plot(MOD_S_env, pars = "^b_")
+
 # Model 1 biomass
 coef_plot_model1_B_GLOBAL_ACTIVE1 <- mcmc_plot(MOD_BIOM_1_run_GLOBAL_ACTIVE1, pars = "^b_")
+coef_plot_model3_B_GLOBAL_ACTIVE1 <- mcmc_plot(MOD_BIOM_3_run_GLOBAL_ACTIVE1, pars = "^b_")
+coef_plot_model_B_ENV <- mcmc_plot(MOD_B_env, pars = "^b_")
 
 ##########################
 ###      ACTIVE 2     ####
@@ -444,9 +448,9 @@ names(model.W.GLOBAL_ACTIVE2.B) <- c("B_model_null","B_model_1","B_model_2","B_m
 #plot(conditional_effects(MOD_BIOM_2_run_GLOBAL_ACTIVE2))
 
 # Model 1 species richness
-coef_plot_model1_S_GLOBAL_ACTIVE2 <- mcmc_plot(MOD_S_1_run_GLOBAL_ACTIVE2, pars = "^b_")
+coef_plot_model3_S_GLOBAL_ACTIVE2 <- mcmc_plot(MOD_S_3_run_GLOBAL_ACTIVE2, pars = "^b_")
 # Model 1 biomass
-coef_plot_model1_B_GLOBAL_ACTIVE2 <- mcmc_plot(MOD_BIOM_1_run_GLOBAL_ACTIVE2, pars = "^b_")
+coef_plot_model3_B_GLOBAL_ACTIVE2 <- mcmc_plot(MOD_BIOM_3_run_GLOBAL_ACTIVE2, pars = "^b_")
 
 ##########################
 ###      PASSIVE      ####
@@ -591,19 +595,19 @@ mcmc_plot(MOD_S_1_run_GLOBAL_ACTIVE2, pars = "^b_")
 r2_bayes(MOD_S_1_run_GLOBAL_ACTIVE1)
 r2_bayes(MOD_S_1_run_GLOBAL_ACTIVE2)
 
-summary(MOD_S_1_run_GLOBAL_ACTIVE1)
-summary(MOD_S_1_run_GLOBAL_ACTIVE2)
-summary(MOD_S_1_run_GLOBAL_PASSIVE)
+summary(MOD_BIOM_1_run_GLOBAL_ACTIVE1)
+summary(MOD_BIOM_3_run_GLOBAL_ACTIVE2)
+summary(MOD_BIOM_1_run_GLOBAL_PASSIVE)
 
 #######################
 ####       ALL        #
 #######################
 
 ### mcmc plots together
-S.all <- ggarrange(coef_plot_model1_S_GLOBAL_ACTIVE1 ,coef_plot_model1_S_GLOBAL_ACTIVE2 ,coef_plot_model1_S_GLOBAL_PASSIVE,
-                   labels=c("GLOBAL_S_ACTIVE_1_model_1","GLOBAL_S_ACTIVE_2_model_1","GLOBAL_S_PASSIVE_model_1"),ncol = 1, nrow = 3) 
-B.all <- ggarrange(coef_plot_model1_B_GLOBAL_ACTIVE1 ,coef_plot_model1_B_GLOBAL_ACTIVE1 ,coef_plot_model1_B_GLOBAL_PASSIVE, ncol = 1, nrow = 3,
-labels=c("GLOBAL_B_ACTIVE_1_model_1","GLOBAL_B_ACTIVE_2_model_1","GLOBAL_B_PASSIVE_model_1"))
+S.all <- ggarrange(coef_plot_model4_S_GLOBAL_ACTIVE1 ,coef_plot_model3_S_GLOBAL_ACTIVE2 ,coef_plot_model1_S_GLOBAL_PASSIVE,coef_plot_model_S_ENV,
+                   labels=c("GLOBAL_S_ACTIVE_1_model_4","GLOBAL_S_ACTIVE_2_model_3","GLOBAL_S_PASSIVE_model_1","GLOBAL_S_ENV"),ncol = 2, nrow = 2) 
+B.all <- ggarrange(coef_plot_model1_B_GLOBAL_ACTIVE1 ,coef_plot_model3_B_GLOBAL_ACTIVE1 ,coef_plot_model3_B_GLOBAL_ACTIVE2,coef_plot_model1_B_GLOBAL_PASSIVE, ncol = 2, nrow = 2,
+labels=c("GLOBAL_B_ACTIVE_1_model_1","GLOBAL_B_ACTIVE_1_model_3","GLOBAL_B_ACTIVE_2_model_3","GLOBAL_B_PASSIVE_model_1"))
 
 ggsave("Models/GLOBAL/GLOBAL_S_coeffs.pdf",S.all,width=10,height=10)
 ggsave("Models/GLOBAL/GLOBAL_B_coeffs.pdf",B.all,width=10,height=10)
@@ -617,13 +621,12 @@ write.csv(r2_bayes.B.all,"Models/GLOBAL/GLOBAL_B_R2.csv")
 ### weights
 weight_active_S_B <- rbind(model.W.GLOBAL_ACTIVE1.S,model.W.GLOBAL_ACTIVE2.S,model.W.GLOBAL_PASSIVE.S,
       model.W.GLOBAL_ACTIVE1.B,model.W.GLOBAL_ACTIVE2.B,model.W.GLOBAL_PASSIVE.B) 
+colnames(weight_active_S_B) <- c("model_null","model_1","model_2","model_3","model_4","model_ENV")
 write.csv(weight_active_S_B,"Models/GLOBAL/GLOBAL_S_B_weights.csv")
 
 ######################
 ###      END       ###
 ######################
-
-
 
 tail(r2_bayes.B.all)
 edit(r2_bayes.B.all)
