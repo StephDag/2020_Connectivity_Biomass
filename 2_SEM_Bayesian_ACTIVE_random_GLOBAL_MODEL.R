@@ -588,6 +588,7 @@ names(model.W.GLOBAL_PASSIVE.B) <- c("B_model_null","B_model_1","B_model_2","B_m
 
 # Model 1 species richness
 coef_plot_model1_S_GLOBAL_PASSIVE <- mcmc_plot(MOD_S_1_run_GLOBAL_PASSIVE, pars = "^b_")
+
 # Model 1 biomass
 coef_plot_model1_B_GLOBAL_PASSIVE <- mcmc_plot(MOD_BIOM_1_run_GLOBAL_PASSIVE, pars = "^b_")
 
