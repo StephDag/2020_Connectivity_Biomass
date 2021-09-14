@@ -86,24 +86,23 @@ all.data$log_Outflow <- log(all.data$OutFlow+1)
 #saveRDS(all.data,here::here("_data","Connectivity_Biomass_SEMGLMMDATA_March2021.rds"))
 
 # correlation between connectivity attributes
-connectivity <- all.data[,c("SelfR","Inflow","Indegree",        
-                            "CorridorIn","IndegreeMP","InflowMPA",       
-                            "IndegreeNe","InflowNei","OutFlow","Outdegree","btwdegree","Netflow")] 
-corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
-                              upper.panel=panel.cor, text.panel=panel.txt)
+#connectivity <- all.data[,c("SelfR","Inflow","Indegree",       
+#                            "IndegreeNe","InflowNei","OutFlow","Outdegree","btwdegree","Netflow")] 
+#corr.connectivity <- corrgram(connectivity,order=TRUE, lower.panel=panel.shade,
+#                              upper.panel=panel.cor, text.panel=panel.txt)
 
 #ggexport(corr.connectivity,filename=here("_prelim.figures","Correlations","Corr_connectivity.pdf"),width=20,height=12)
 
 # correlation between environmental + human attributes
-env_human <- all.data[,c("log_grav_total","log_grav_neiBR","temp","prod.annual","Age_of_pro")] 
-corr.env_human <- corrgram(env_human,order=TRUE, lower.panel=panel.shade,
-                              upper.panel=panel.cor, text.panel=panel.txt)
+#env_human <- all.data[,c("log_grav_total","temp","prod.annual","Age_of_pro")] 
+#corr.env_human <- corrgram(env_human,order=TRUE, lower.panel=panel.shade,
+#                              upper.panel=panel.cor, text.panel=panel.txt)
 
 #ggexport(corr.env_human,filename=here("_prelim.figures","Correlations","Corr_env_human.pdf"),width=20,height=12)
 
-ggplot(all.data,aes(x=log_grav_total,y=log_grav_neiBR)) +
-  geom_point() +
-  geom_smooth()
+#ggplot(all.data,aes(x=log_grav_total,y=log_grav_neiBR)) +
+#  geom_point() +
+#  geom_smooth()
 
 # Transient
 TRANSIENT %>% rm()
@@ -128,9 +127,9 @@ colnames(TRANSIENT.std)[c(1,2)] <- c("Class","region")
 TRANSIENT.std$log_biomassarea <- TRANSIENT$log_biomassarea
 #TRANSIENT.std$Richness <- TRANSIENT$Richness
 
-ggplot(TRANSIENT.std,aes(x=log_InflowNei,y=log_biomassarea)) +
-  geom_point() +
-  geom_smooth(method="gam")
+#ggplot(TRANSIENT.std,aes(x=log_InflowNei,y=log_biomassarea)) +
+#  geom_point() +
+#  geom_smooth(method="gam")
 
 
 head(TRANSIENT.std)
